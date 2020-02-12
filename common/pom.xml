@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <description>SDO IoT Platform SDK - Common Rest Interfaces</description>
+  <groupId>org.sdo.iotplatformsdk</groupId>
+  <artifactId>common</artifactId>
+  <name>SDO IoT Platform SDK - Common Interfaces</name>
+  <packaging>pom</packaging>
+  <url>file:///tmp/sdo</url>
+
+  <parent>
+    <groupId>org.sdo</groupId>
+    <artifactId>iotplatformsdk</artifactId>
+    <version>1.7</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <properties>
+    <junit-jupiter-api.version>5.3.2</junit-jupiter-api.version>
+    <junit-jupiter-params.version>5.3.2</junit-jupiter-params.version>
+    <junit-jupiter-engine.version>5.3.2</junit-jupiter-engine.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit-jupiter-api.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit-jupiter-params.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit-jupiter-engine.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <modules>
+    <module>rest</module>
+    <module>protocol</module>
+  </modules>
+
+  <build>
+    <pluginManagement>
+	  <plugins>
+       <!-- This plugin provides the capability to build jars. -->
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jar-plugin</artifactId>
+         <version>3.1.0</version>
+         <configuration>
+           <archive>
+             <manifestEntries>
+               <Sealed>true</Sealed>
+             </manifestEntries>
+           </archive>
+         </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+          <configuration>
+            <release>11</release>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

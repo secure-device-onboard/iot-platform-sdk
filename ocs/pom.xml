@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <description>SDO IoT Platform SDK - Owner Companion Service implementation</description>
+  <groupId>org.sdo.iotplatformsdk</groupId>
+  <artifactId>ocs</artifactId>
+  <name>SDO IoT Platform SDK - Owner Companion Service</name>
+  <packaging>pom</packaging>
+  <url>file:///tmp/sdo</url>
+
+  <parent>
+    <groupId>org.sdo</groupId>
+    <artifactId>iotplatformsdk</artifactId>
+    <version>1.7</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <modules>
+    <module>libocs</module>
+    <module>fsimpl</module>
+  </modules>
+
+  <build>
+    <pluginManagement>
+	  <plugins>
+       <!-- This plugin provides the capability to build jars. -->
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-jar-plugin</artifactId>
+         <version>3.1.0</version>
+         <configuration>
+           <archive>
+             <manifestEntries>
+               <Sealed>true</Sealed>
+             </manifestEntries>
+           </archive>
+         </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+          <configuration>
+            <release>11</release>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

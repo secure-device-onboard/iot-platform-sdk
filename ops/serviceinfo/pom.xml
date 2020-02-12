@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <description>SDO IoT Platform SDK - Owner Protocol Service Serviceinfo module</description>
+  <groupId>org.sdo.iotplatformsdk.ops</groupId>
+  <artifactId>serviceinfo</artifactId>
+  <name>SDO IoT Platform SDK - Owner Protocol Service Serviceinfo module</name>
+  <packaging>jar</packaging>
+  <url>file:///tmp/sdo</url>
+
+  <parent>
+    <groupId>org.sdo.iotplatformsdk</groupId>
+    <artifactId>ops</artifactId>
+    <version>1.7</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sdo.iotplatformsdk.common</groupId>
+      <artifactId>protocol</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

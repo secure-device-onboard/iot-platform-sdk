@@ -1,0 +1,676 @@
+# Copyright 2020 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+---
+swagger: "2.0"
+info:
+  description: The API For Ops to Ocs communications
+  version: 1.0.0
+  title: owner-configuration-api
+host: virtserver.swaggerhub.com
+basePath: /rftemple/OwnerCompanion/1.0.0
+schemes:
+- https
+paths:
+  /v1/devices/{deviceId}/voucher:
+    get:
+      tags:
+      - OCS
+      summary: Gets the owner voucher for the device
+      operationId: getDeviceVoucher
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: the voucher as a string
+          schema:
+            type: string
+        404:
+          description: Not found
+        500:
+          description: Server error
+  /v1/devices/voucher:
+    post:
+      tags:
+      - OCS
+      summary: sets owner voucher for the device
+      operationId: postDeviceVoucher
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: voucher
+        required: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: response
+        500:
+          description: Server error
+        503:
+          description: Temporarily Unaviable
+  /v1/devices/{deviceId}/blob:
+    delete:
+      tags:
+      - Optional
+      summary: Deletes the entire device blob and all of its related data.
+      operationId: deleteDeviceBlob
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: Device was deleted
+        404:
+          description: Not found
+        500:
+          description: Server error
+  /v1/devices/{deviceId}/msgs:
+    get:
+      tags:
+      - OCS
+      summary: Retrieves all serviceInfo Messages to be sent to the device
+      operationId: getServiceInfo
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/ArrayOfSviMessage'
+        404:
+          description: The device not found
+        500:
+          description: Server error
+    post:
+      tags:
+      - OCS
+      summary: Posts a deviceServiceInfo message recieved from the device
+      operationId: postDeviceServiceInfo
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: messages
+        required: false
+        schema:
+          $ref: '#/definitions/ModuleMessage'
+      responses:
+        200:
+          description: response
+    put:
+      tags:
+      - Optional
+      summary: Updates all service info messages to be sent to the device
+      operationId: putServiceInfo
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - name: valueId
+        in: path
+        description: The Id of the ServiceInfo value to update
+        required: true
+        type: string
+      - in: body
+        name: messages
+        required: false
+        schema:
+          $ref: '#/definitions/ModuleMessage'
+      responses:
+        200:
+          description: response
+  /v1/devices/{deviceId}/values/{valueId}:
+    get:
+      tags:
+      - OCS
+      summary: Gets the value of a ServiceInfo message or a range of bytes within the value
+      operationId: getSviValue
+      produces:
+      - application/octet-stream
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - name: valueId
+        in: path
+        description: The Id of the ServiceInfo value to retrieve
+        required: true
+        type: string
+      - name: start
+        in: query
+        description: Starting index is inclusive
+        required: true
+        type: integer
+      - name: end
+        in: query
+        description: Ending index is exclusive
+        required: true
+        type: integer
+      responses:
+        200:
+          description: value of a module message message
+          schema:
+            type: file
+        404:
+          description: Not found
+        500:
+          description: Server error
+    put:
+      tags:
+      - Optional
+      summary: Updates a service info value for a device
+      operationId: putSviValue
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - name: valueId
+        in: path
+        description: The Id of the ServiceInfo value to update
+        required: true
+        type: string
+      - in: body
+        name: messages
+        required: false
+        schema:
+          $ref: '#/definitions/ModuleMessage'
+      responses:
+        200:
+          description: response
+  /v1/devices/{deviceId}/psi:
+    get:
+      tags:
+      - OCS
+      summary: Gets the pre-service messages to send to the device
+      operationId: getPsi
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/ArrayOfModuleMessage'
+  /v1/devices/{deviceId}/setupinfo:
+    get:
+      tags:
+      - OCS
+      summary: Get the replacement credentials for the device
+      operationId: getSetupInfo
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/SetupInfoResponse'
+  /v1/devices/{deviceId}/errors:
+    post:
+      tags:
+      - OCS
+      summary: logs error for the
+      operationId: postErrors
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: messages
+        required: false
+        schema:
+          $ref: '#/definitions/ProtocolError'
+      responses:
+        200:
+          description: response
+  /v1/devices/{deviceId}/state:
+    get:
+      tags:
+      - OCS
+      summary: the state of the device
+      operationId: getDeviceState
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/DeviceState'
+    post:
+      tags:
+      - OCS
+      summary: logs error for the
+      operationId: postState
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: The updated state of the device
+        required: false
+        schema:
+          $ref: '#/definitions/DeviceState'
+      responses:
+        200:
+          description: response
+  /v1/devices/{deviceId}/sessioninfo:
+    get:
+      tags:
+      - OCS
+      summary: Gets the session info stored for the decive
+      operationId: getDeviceSessionInfo
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/SessionInfo'
+    post:
+      tags:
+      - OCS
+      summary: Updates the session info for the device
+      operationId: postDeviceSessionInfo
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: The updated session info that needs to be stored
+        required: false
+        schema:
+          $ref: '#/definitions/SessionInfo'
+      responses:
+        200:
+          description: response
+    delete:
+      tags:
+      - OCS
+      summary: Deletes the session info for the device
+      operationId: deleteDeviceSessionInfo
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: response
+  /v1/signatures/{deviceId}:
+    post:
+      tags:
+      - OCS
+      summary: Owner Signature operations
+      operationId: postSignature
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: message
+        required: true
+        description: Message to sign
+        schema:
+          type: string
+      responses:
+        200:
+          description: response
+          schema:
+            $ref: '#/definitions/SignatureResponse'
+  /v1/ciphers/{deviceId}:
+    post:
+      tags:
+      - OCS
+      summary: Perform the cipher operation on input array of bytes and return the resulting array of bytes
+      operationId: postCiphers
+      consumes:
+      - application/json
+      produces:
+      - application/octet-stream
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        type: string
+      - name: operation
+        in: path
+        required: true
+        type: string
+        enum: [encipher, decipher]
+        description: The name of the cipher operation
+      - in: body
+        name: message
+        required: true
+        description: The message to perform cipher the operation on
+        schema:
+          type: string
+      responses:
+        200:
+          description: the result of the cipher operation
+
+definitions:
+  ArrayOfSviMessage:
+    type: array
+    items:
+      $ref: '#/definitions/SviMessage'
+  SviMessage:
+    type: object
+    properties:
+      module:
+        type: string
+        example: sdo_sys
+        description: The name of the module sending the message
+      msg:
+        example: exec, filedesc, write, etc
+        description: The name of the messenge being sent
+      valueLen:
+        type: integer
+        description: the total length of the value of the message
+      enc:
+        type: string
+        description: the intened encoding expected to use when sending the value
+        enum:
+        - base64
+        - ascii
+      valueId:
+        type: string
+        description: the id to use when retrieving the value of the message
+  ArrayOfModuleMessage:
+    type: array
+    description: An array of Device service info messages
+    items:
+      $ref: '#/definitions/ModuleMessage'
+  ModuleMessage:
+    type: object
+    properties:
+      module:
+       description: The module sending the message
+       type: string
+      msg:
+        description: The name of the messenge being sent
+        type: string
+      value:
+        type: string
+        description: The value of the message
+  ProtocolError:
+    type: object
+    properties:
+      ec:
+        type: integer
+        description: error code
+      em:
+        type: string
+        description: String message
+      emsg:
+        type: integer
+        description: String message
+  SignatureResponse:
+    type: object
+    properties:
+      pk:
+        type: string
+        description: The public key to verify the signature
+      alg:
+        type: string
+        description: The name of the agorithm used to generate the signature
+      sg:
+        type: string
+        description: The signature value encoded as ASN.1 for EC keys or RAW encoding for RSA keys
+  DeviceState:
+    type: object
+    properties:
+      to2State:
+        type: string
+        description: The to2State of the device
+        enum:
+        - to2begin
+        - to2end
+        - to2error
+      to2Timestamp:
+        type: string
+        description: ISO 8601 date format last state change
+      to2Error:
+           $ref: '#/definitions/ProtocolError'
+      to0Ws:
+        type: integer
+        description: The wait seconds recived from To0
+      to0Timestamp:
+        type: string
+        description: ISO 8601 timestamp of the To0
+      to0Error:
+           $ref: '#/definitions/ProtocolError'
+      g3:
+       type: string
+       description: replacement guid
+  SetupInfoResponse:
+    type: object
+    properties:
+      g3:
+        type: string
+        description: guid for setup credential
+      r3:
+        type: array
+        description: rendezvous instructions for replacement credential
+        items:
+          $ref: '#/definitions/RendezvousInfo'
+      pub2:
+        type: string
+        description: public key for  replacement credential
+  RendezvousInfo:
+    type: object
+    properties:
+      only:
+        type: string
+        description: only for
+      ip:
+        type: string
+        description: ip addess
+      po:
+        type: integer
+        description: port used by the device T02
+      pow:
+        type: integer
+        description: port used by the owner for T0
+      dn:
+        type: string
+        description: Domain name
+      sch:
+        type: string
+        description: Server Certificate Hash
+      cch:
+        type: string
+        description: CA Certificate Hash
+      ui:
+        type: integer
+        description: User Input requred
+      ss:
+        type: string
+        description: Wireless SSID
+      pw:
+        type: string
+        description: Wireless Password
+      wsp:
+        type: string
+        description: Wireless Security Password
+      me:
+        type: string
+        description: Medium
+      pr:
+        type: string
+        description: Protocol
+      delaysec:
+        type: integer
+        description: delay seconds
+  SessionInfo:
+    type: object
+    properties:
+      message41Store:
+        $ref: '#/definitions/Message41Store'
+      message45Store:
+        $ref: '#/definitions/Message45Store'
+      message47Store:
+        $ref: '#/definitions/Message47Store'
+      deviceCryptoInfo:
+        $ref: '#/definitions/DeviceCryptoInfo'
+  Message41Store:
+    type: object
+    properties:
+      n6:
+        type: string
+      kx:
+        type: string
+      ownershipProxy:
+        type: string
+      cs:
+        type: string
+      kxEcdhPublicKey:
+        type: string
+      kxEcdhPrivateKey:
+        type: string
+      kxEcdhRandom:
+        type: string
+      kxDhPublicKey:
+        type: string
+      kxDhPrivateKey:
+        type: string
+      asymRandom:
+        type: string
+  Message45Store:
+    type: object
+    properties:
+      n7:
+        type: string
+      nn:
+        type: integer
+      xb:
+        type: string
+  Message47Store:
+    type: object
+    properties:
+      newOwnershipProxy:
+        type: string
+  DeviceCryptoInfo:
+    type: object
+    properties:
+      ctrNonce:
+        type: string
+      ctrCounter:
+        type: number
+  OwnerVoucher:
+    type: object
+    required:
+    - en
+    - hmac
+    - oh
+    - sz
+    properties:
+      sz:
+        type: integer
+      oh:
+        $ref: '#/definitions/OwnerVoucherHeader'
+      hmac:
+        type: array
+        items: {}
+      dc:
+        type: array
+        items: {}
+      en:
+        type: array
+        items: {}
+  OwnerVoucherHeader:
+    type: object
+    properties:
+      pv:
+        type: integer
+        description: protocol version
+      pe:
+        type: integer
+        description: public key encoding
+      r:
+        type: array
+        description: rendezvous instructions
+        items: {}
+      g:
+        type: string
+        description: base64 encoded guid (deviceID)
+      d:
+        type: string
+        description: deviceinfo
+      pk:
+        type: array
+        description: mfg public Key
+        items: {}
+      hdc:
+        type: array
+        items: {}

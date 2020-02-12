@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Copyright 2020 Intel Corporation
+     SPDX-License-Identifier: Apache 2.0
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <description>
+    SDO IoT Platform SDK - To0 Scheduler Application.
+  </description>
+  <name>SDO IoT Platform SDK - To0 Service</name>
+  <groupId>org.sdo.iotplatformsdk</groupId>
+  <artifactId>to0service</artifactId>
+  <packaging>pom</packaging>
+  <url>file:///tmp/sdo</url>
+
+
+  <parent>
+    <groupId>org.sdo</groupId>
+    <artifactId>iotplatformsdk</artifactId>
+    <version>1.7</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <properties>
+  </properties>
+
+
+  <modules>
+    <module>libto0</module>
+    <module>to0serviceimpl</module>
+    <module>to0client</module>
+  </modules>
+
+  <build>
+    <plugins>
+
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.6.0</version>
+        </plugin>
+
+        <!-- The Application Assembler Plugin is a Maven plugin for generating
+          scripts for starting java applications. All dependencies and the
+          artifact of the project itself are placed in a generated Maven
+          repository in a defined assemble directory. All artifacts
+          (dependencies + the artifact from the project) are added to the
+          classpath in the generated bin scripts. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>appassembler-maven-plugin</artifactId>
+          <version>1.10</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>assemble</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- This plugin provides the capability to build jars. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.0</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Sealed>true</Sealed>
+              </manifestEntries>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+          <configuration>
+            <release>11</release>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
