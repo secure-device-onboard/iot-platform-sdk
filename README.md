@@ -20,6 +20,7 @@ The following are the system constraints for the SDO IoT Platform SDK:
 - Docker compose 1.21.2
 - Haveged
 
+
 # Directory structure
 
 Details about the directory structure for iot-platform-sdk in the source and binary package are
