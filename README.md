@@ -1,5 +1,6 @@
 # About
 
+
 The Secure Device Onboard (SDO) IoT Platform SDK is the SDO Owner protocol implementation. It is
 divided into three different components: Owner Protocol Service (OPS), TO0 Scheduler (TO0Scheduler)
 and Owner Companion Service (OCS). OCS manages customer-specific artifacts (OwnershipVoucher files,
