@@ -1,17 +1,15 @@
 /*******************************************************************************
  * Copyright 2020 Intel Corporation
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  *******************************************************************************/
 
 package org.sdo.iotplatformsdk.common.protocol.security.keyexchange;
@@ -34,6 +32,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
@@ -46,8 +45,6 @@ import java.util.List;
 
 import javax.crypto.KeyAgreement;
 
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.sdo.iotplatformsdk.common.protocol.security.BouncyCastleSupplier;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
 import org.sdo.iotplatformsdk.common.protocol.types.Keys;
 import org.sdo.iotplatformsdk.common.protocol.util.BigIntegers;
@@ -253,8 +250,8 @@ public abstract class EcdhKeyExchange implements KeyExchange {
   private void init() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
 
     final KeyPairGenerator gen;
-    gen = KeyPairGenerator.getInstance(ECDSA, BouncyCastleSupplier.load());
-    gen.initialize(ECNamedCurveTable.getParameterSpec(getCurve()), getSecureRandom());
+    gen = KeyPairGenerator.getInstance(ECDSA);
+    gen.initialize(new ECGenParameterSpec(getCurve()), getSecureRandom());
 
     final KeyPair myKeyPair = gen.generateKeyPair();
 
@@ -293,7 +290,7 @@ public abstract class EcdhKeyExchange implements KeyExchange {
 
   public static class P256 extends EcdhKeyExchange {
 
-    private static final String CURVE = "P-256";
+    private static final String CURVE = "secp256r1";
     private static final int RANDOM_BYTES = 128 / 8;
     private static final KeyExchangeType TYPE = KeyExchangeType.ECDH;
 
@@ -304,7 +301,7 @@ public abstract class EcdhKeyExchange implements KeyExchange {
   }
 
   public static class P384 extends EcdhKeyExchange {
-    private static final String CURVE = "P-384";
+    private static final String CURVE = "secp384r1";
     private static final int RANDOM_BYTES = 384 / 8;
     private static final KeyExchangeType TYPE = KeyExchangeType.ECDH384;
 

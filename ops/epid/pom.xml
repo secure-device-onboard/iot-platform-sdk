@@ -16,38 +16,19 @@
   <parent>
     <groupId>org.sdo.iotplatformsdk</groupId>
     <artifactId>ops</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
     <relativePath>..</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
-      <groupId>javax.xml.bind</groupId>
-      <artifactId>jaxb-api</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.sdo.iotplatformsdk.common</groupId>
       <artifactId>protocol</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
-	  <version>1.61</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
   </dependencies>
 </project>

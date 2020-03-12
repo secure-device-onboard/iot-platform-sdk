@@ -1,23 +1,16 @@
 /*******************************************************************************
  * Copyright 2020 Intel Corporation
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  *******************************************************************************/
-
-/*
- * WARNING: THIS FILE CONTAINS DEMO CODE THAT IS NOT INTENDED FOR SECURE DEPLOYMENT. CUSTOMERS MUST
- * REPLACE THESE CLASSES WITH AN IMPLEMENTATION THAT IS SECURE WITHIN THEIR ENVIRONMENT.
- */
 
 package org.sdo.iotplatformsdk.to0scheduler.to0service;
 
@@ -52,7 +45,6 @@ import org.sdo.iotplatformsdk.common.protocol.rest.SdoControllerAdvice;
 import org.sdo.iotplatformsdk.common.protocol.security.CryptoLevel;
 import org.sdo.iotplatformsdk.common.protocol.security.CryptoLevel112;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
-import org.sdo.iotplatformsdk.common.protocol.types.To1SdoRedirect;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0ClientSession;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0Controller;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0ProxyStore;
@@ -86,6 +78,9 @@ public class To0ServiceConfiguration {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(To0ServiceConfiguration.class);
   private final SdoProperties sdoProperties;
+
+  @Value("${application.version}")
+  private String applicationVersion;
 
   // the number of thread in the ThreadPoolTaskExecutor.
   @Value("${thread.pool.size:10}")
@@ -138,13 +133,6 @@ public class To0ServiceConfiguration {
     return new ClientHttpRequestFactoryCreatingFactoryBean();
   }
 
-  @Bean
-  protected To1SdoRedirect to1SdoRedirect() {
-    SdoProperties.To0.OwnerSign ownerSign = getProperties().getTo0().getOwnerSign();
-    SdoProperties.To0.OwnerSign.To1d.Bo to1d = ownerSign.getTo1d().getBo();
-
-    return new To1SdoRedirect(to1d.getI1(), to1d.getDns1(), to1d.getPort1(), null);
-  }
 
   @Bean
   protected CryptoLevel cryptoLevel() {
@@ -159,7 +147,8 @@ public class To0ServiceConfiguration {
   @Bean
   @Scope("prototype")
   protected To0ClientSession to0Session() {
-    To0ClientSession to0ClientSession = new To0ClientSession(signatureServiceFactory());
+    To0ClientSession to0ClientSession = new To0ClientSession(signatureServiceFactory(),
+        getProperties().getTo0().getOwnerSign().getTo1d().getBo());
     return to0ClientSession;
   }
 
@@ -226,6 +215,11 @@ public class To0ServiceConfiguration {
   protected FactoryBean<Certificate> certificateFactoryBean() {
     CertificateFactoryBean factory = new CertificateFactoryBean();
     return factory;
+  }
+
+  @Bean
+  protected To0HealthController to0HealthController() {
+    return new To0HealthController(applicationVersion);
   }
 
   @Bean

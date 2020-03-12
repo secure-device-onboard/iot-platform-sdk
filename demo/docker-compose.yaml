@@ -1,0 +1,93 @@
+# Copyright 2020 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+
+version: "2.4"
+
+services:
+
+  to0scheduler:
+    image: to0scheduler:1.8
+    container_name: to0scheduler
+    expose:
+      - "8049"
+    ports:
+      - "8049:8049"
+    build:
+      context: .
+      dockerfile: to0scheduler/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    environment:
+      - "http_proxy=${http_proxy}"
+      - "https_proxy=${https_proxy}"
+      - "no_proxy=${no_proxy}"
+    restart: on-failure:5
+    # Mapping to the user workspace of 'sdouser' as created in the Dockerfile.
+    # If the username is updated in the Dockerfile, please replace 'sdouser' with the same.
+    volumes:
+      - ./to0scheduler/config/redirect.properties:/home/sdouser/to0scheduler/config/redirect.properties:ro
+    mem_limit: 500m
+    mem_reservation: 200m
+    cpu_shares: 5
+    pids_limit: 100
+    network_mode: host
+    
+  ocs:
+    image: ocs:1.8
+    container_name: owner-companion-service
+    expose:
+      - "9009"
+    ports:
+      - "9009:9009"
+    depends_on:
+      - to0scheduler
+    build:
+      context: .
+      dockerfile: ocs/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    environment:
+      - "http_proxy=${http_proxy}"
+      - "https_proxy=${https_proxy}"
+      - "no_proxy=${no_proxy}"
+    restart: on-failure:5
+    # Mapping to the user workspace of 'sdouser' as created in the Dockerfile.
+    # If the username is updated in the Dockerfile, please replace 'sdouser' with the same.
+    volumes:
+      - ./ocs/config/db:/home/sdouser/ocs/config/db
+    mem_limit: 500m
+    mem_reservation: 200m
+    cpu_shares: 5
+    pids_limit: 100
+    network_mode: host
+
+  ops:
+    image: ops:1.8
+    container_name: owner-protocol-service
+    expose:
+      - 8042
+    ports:
+      - "8042:8042"
+    depends_on:
+      - ocs
+    build:
+      context: .
+      dockerfile: ops/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    environment:
+      - "http_proxy=${http_proxy}"
+      - "https_proxy=${https_proxy}"
+      - "no_proxy=${no_proxy}"
+    restart: on-failure:5
+    mem_limit: 500m
+    mem_reservation: 200m
+    cpu_shares: 5
+    pids_limit: 100
+    network_mode: host

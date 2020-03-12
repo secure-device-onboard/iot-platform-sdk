@@ -1,23 +1,19 @@
 /*******************************************************************************
  * Copyright 2020 Intel Corporation
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  *******************************************************************************/
 
 package org.sdo.iotplatformsdk.common.protocol.config;
 
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -908,93 +904,23 @@ public class SdoProperties {
        */
       public static class To1d {
 
-        private final Bo bo = new Bo();
+        private @Nullable URI bo = null;
 
         /**
          * Property container org.sdo.TO0.OwnerSign.to1d.bo.
          *
-         * <p>@see Bo
+         * <p>This represents a URI that contains the following properties:
+         * TO0.OwnerSign.to1d.bo.i1,
+         * TO0.OwnerSign.to1d.bo.dns1, and
+         * TO0.OwnerSign.to1d.bo.port1 information.
          */
-        public Bo getBo() {
+        @Nullable
+        public URI getBo() {
           return bo;
         }
 
-        /**
-         * TO0.OwnerSign.to1d.bo properties.
-         *
-         * <p>This class exists only as a value object, with no interesting behavior of its own.
-         */
-        public static class Bo {
-
-          public static final int PORT1_DEFAULT = 8042;
-
-          private @Nullable String dns1 = null;
-          private @Nullable InetAddress i1 = null;
-          private Integer port1 = PORT1_DEFAULT;
-
-          /**
-           * Try to determine the network interface.
-           */
-          public Bo() {
-            // This odd-looking socket doesn't actually connect to the outside world,
-            // nor does the target IP need to be reachable. By putting a datagram socket
-            // into a connect state, we can determine our outgoing network interface.
-            try (final DatagramSocket socket = new DatagramSocket()) {
-              socket.connect(InetAddress.getByName("8.8.8.8"), 8888);
-              this.dns1 = socket.getLocalAddress().getCanonicalHostName();
-
-            } catch (Exception e) {
-              this.i1 = InetAddress.getLoopbackAddress();
-            }
-          }
-
-          /**
-           * Property org.sdo.to0.ownersign.to1d.bo.dns1.
-           *
-           * <p>The value to use in protocol field TO0.OwnerSign.To1d.bo.dns1.
-           *
-           * <p>This property is optional, and defaults to the local host's DNS name, if available.
-           */
-          @Nullable
-          public String getDns1() {
-            return dns1;
-          }
-
-          public void setDns1(@Nullable String dns1) {
-            this.dns1 = dns1;
-          }
-
-          /**
-           * Property org.sdo.to0.ownersign.to1d.bo.i1.
-           *
-           * <p>The value to use in protocol field TO0.OwnerSign.To1d.bo.i1.
-           *
-           * <p>This property is optional, and defaults to the loopback IP if the local DNS name
-           * is not available.
-           */
-          @Nullable
-          public InetAddress getI1() {
-            return i1;
-          }
-
-          public void setI1(@Nullable InetAddress i1) {
-            this.i1 = i1;
-          }
-
-          /**
-           * Property org.sdo.to0.ownersign.to1d.bo.port1.
-           *
-           * <p>The value to use in protocol field TO0.OwnerSign.to1d.bo.port1.
-           *
-           * <p>This property is optional, and defaults to {@value PORT1_DEFAULT}.
-           */
-          public Integer getPort1() {
-            return port1;
-          }
-
-          public void setPort1(Integer port1) {
-            this.port1 = port1;
-          }
+        public void setBo(@Nullable URI bo) {
+          this.bo = toAbsolute(bo);
         }
       }
     }

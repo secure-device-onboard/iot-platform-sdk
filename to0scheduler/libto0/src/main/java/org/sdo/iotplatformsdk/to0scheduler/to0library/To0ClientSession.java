@@ -1,17 +1,15 @@
 /*******************************************************************************
  * Copyright 2020 Intel Corporation
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  *******************************************************************************/
 
 package org.sdo.iotplatformsdk.to0scheduler.to0library;
@@ -64,12 +62,14 @@ public class To0ClientSession {
 
   private static final Logger LOG = LoggerFactory.getLogger(To0ClientSession.class);
   private final SignatureServiceFactory signatureServiceFactory;
+  private final URI to1dOwnerRedirectPath;
   private ClientHttpRequestFactory requestFactory = null;
-  private To1SdoRedirect to1SdoRedirect = null;
   private WaitSecondsBuilder waitSecondsBuilder = new SimpleWaitSecondsBuilder();
 
-  public To0ClientSession(final SignatureServiceFactory signatureServiceFactory) {
+  public To0ClientSession(final SignatureServiceFactory signatureServiceFactory,
+      URI to1dRedirectPath) {
     this.signatureServiceFactory = signatureServiceFactory;
+    this.to1dOwnerRedirectPath = to1dRedirectPath;
   }
 
   /**
@@ -113,13 +113,13 @@ public class To0ClientSession {
     /**
      * Decoding the response from the server Receiving message 21 from the server.
      */
-    To0HelloAck helloAck = new To0HelloAckCodec().decoder().apply(CharBuffer.wrap(response));
+    final To0HelloAck helloAck = new To0HelloAckCodec().decoder().apply(CharBuffer.wrap(response));
 
     /**
      * Composing To0d of message 22 To compose the message, retrieving the nonce (n3) from the
      * server response.
      */
-    To0OwnerSignTo0d to0d =
+    final To0OwnerSignTo0d to0d =
         new To0OwnerSignTo0d(proxy, getWaitSecondsBuilder().apply(proxy), helloAck.getN3());
 
     writer = new StringWriter();
@@ -138,8 +138,9 @@ public class To0ClientSession {
     /**
      * Composing to1d.
      */
-    To1SdoRedirect redirect = new To1SdoRedirect(getTo1SdoRedirect().getI1(),
-        getTo1SdoRedirect().getDns1(), getTo1SdoRedirect().getPort1(), to0dh);
+    final To1dOwnerRedirect to1dOwnerRedirect = new To1dOwnerRedirect(to1dOwnerRedirectPath);
+    final To1SdoRedirect redirect = new To1SdoRedirect(to1dOwnerRedirect.getI1(),
+        to1dOwnerRedirect.getDns1(), to1dOwnerRedirect.getPort1(), to0dh);
 
     writer = new StringWriter();
     new To1SdoRedirectCodec().encoder().apply(writer, redirect);
@@ -151,7 +152,7 @@ public class To0ClientSession {
     /**
      * Composing message 22 and encoding it.
      */
-    To0OwnerSign ownerSign = new To0OwnerSign(to0d, to1d);
+    final To0OwnerSign ownerSign = new To0OwnerSign(to0d, to1d);
     writer = new StringWriter();
     new To0OwnerSignCodec.To0OwnerSignEncoder(
         new SignatureBlockCodec.Encoder(new PublicKeyCodec.Encoder(proxy.getOh().getPe())))
@@ -202,18 +203,6 @@ public class To0ClientSession {
   @Autowired
   public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
-  }
-
-  private To1SdoRedirect getTo1SdoRedirect() {
-    if (null == to1SdoRedirect) {
-      throw new IllegalStateException("To1SdoRedirect must not be null");
-    }
-    return to1SdoRedirect;
-  }
-
-  @Autowired
-  public void setTo1SdoRedirect(To1SdoRedirect to1SdoRedirect) {
-    this.to1SdoRedirect = to1SdoRedirect;
   }
 
   private WaitSecondsBuilder getWaitSecondsBuilder() {
