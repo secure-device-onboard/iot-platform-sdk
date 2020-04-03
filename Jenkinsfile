@@ -15,9 +15,9 @@ stage('build iot-package-sdk package'){
 stage('archive artifacts'){
   sh '''
     mkdir -p Iot-Platform-SDK/docker
-    cp -r iot-platform-sdk/ops/owner/target/owner*.jar Iot-Platform-SDK
-    cp -r iot-platform-sdk/to0scheduler/to0client/target/to0client*.jar Iot-Platform-SDK
-    cp -r iot-platform-sdk/docker Iot-Platform-SDK/
+    cp -r ops/owner/target/owner*.jar Iot-Platform-SDK
+    cp -r to0scheduler/to0client/target/to0client*.jar Iot-Platform-SDK
+    cp -r docker Iot-Platform-SDK/
     '''
     zip zipFile: 'Iot-Platform-SDK.zip', archive: false, dir: 'Iot-Platform-SDK'
     archiveArtifacts artifacts: 'Iot-Platform-SDK.zip', fingerprint: true, allowEmptyArchive: false
