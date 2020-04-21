@@ -1,6 +1,5 @@
 # About
 
-
 The Secure Device Onboard (SDO) IoT Platform SDK is the SDO Owner protocol implementation. It is
 divided into three different components: Owner Protocol Service (OPS), TO0 Scheduler (TO0Scheduler)
 and Owner Companion Service (OCS). OCS manages customer-specific artifacts (OwnershipVoucher files,
@@ -13,14 +12,13 @@ to retrieve customer-specific artifacts.
 
 The following are the system constraints for the SDO IoT Platform SDK:
 - Operating System: Ubuntu* 18.04
-- Java* Development Kit 11.0.4 (Java* Development Kit 11.0.5 or later are not supported)
-- Apache Maven* 3.5.0 (Optional) software for building the SDO IoT Platform SDK from source
+- Java* Development Kit 11
+- Apache Maven* 3.5.4 (Optional) software for building the SDO IoT Platform SDK from source
 - Java IDE (Optional) for convenience in modifying the source code (especially for customizing OCS).
 - OpenSSL (Optional) for creating owner keys and key-store
 - Docker 18.09
 - Docker compose 1.21.2
 - Haveged
-
 
 # Directory structure
 
@@ -29,7 +27,7 @@ described as follows.
 
 The following notations are used in this document:
 
-* `<sdo-iot-platform-sdk_root>`: iot-platform-sdk/
+* `<sdo-iot-platform-sdk-root>`: iot-platform-sdk/
 
 ## Source Code Release
 The SDO IoT Platform SDK source code has the following folders:
@@ -44,20 +42,16 @@ The SDO IoT Platform SDK source code has the following folders:
 
 Configuration files for the preceding three modules are placed in the following folders:
 
-* `<ocs_config_dir>` : <sdo-iot-platform-sdk_root>/docker/ocs/config
-* `<ops_config_dir>` : <sdo-iot-platform-sdk_root>/docker/ops/config
-* `<to0scheduler_config_dir>` : <sdo-iot-platform-sdk_root>/docker/to0scheduler/config
+* `<ocs-config-dir>` : <sdo-iot-platform-sdk-root>/demo/ocs/config
+* `<ops-config-dir>` : <sdo-iot-platform-sdk-root>/demo/ops/config
+* `<to0scheduler-config-dir>` : <sdo-iot-platform-sdk-root>/demo/to0scheduler/config
 
-While building the source code, the target binaries are found in the target
+After building the source code, the target binaries are found in the target
 folder within the `ocs`, `ops`, and `to0scheduler` folders.
 
-* `<ocs_dir>`: <sdo-iot-platform-sdk_root>/ocs/fsimpl/target
-* `<ops_dir>`: <sdo-iot-platform-sdk_root>/ops/restimpl/target
-* `<to0scheduler_dir>`: <sdo-iot-platform-sdk_root>/to0scheduler/to0serviceimpl/target
-
-## Source Binary Release
-The binary files of different components are stored within <sdo_bin_dir>. Each subfolder
-within <sdo_bin_dir> contains the binary files and required artifacts to run a particular component.
+* `<ocs-bin-dir>`: <sdo-iot-platform-sdk-root>/demo/ocs/
+* `<ops-bin-dir>`: <sdo-iot-platform-sdk-root>/demo/ops/
+* `<to0scheduler-bin-dir>`: <sdo-iot-platform-sdk-root>/demo/to0scheduler/
 
 # Building the SDO IoT Platform SDK
 
@@ -74,13 +68,15 @@ The SDO IoT Platform SDK demo can either be run manually, by running the binarie
 or it can be run using Docker scripts. To run each component in separate
 machines, replace the keystore and truststore files. The certificates inside
 these files must match the machine's IP/DNS where the component is running.
+The Protocol Reference Implementation (PRI), containing Rendezvous and Device
+can be used to run the demo. For more information on setting up PRI, follow the
+product's README.
 
 The following instructions follow these notations:
 
-* `<sdo_bin_dir>`: Base location of the SDO release binaries.
-* `<cri_bin_dir>`: Base location of the cri release binaries, typically `<sdo_bin_dir>/cri/`
-* `<rendezvous_dir>`: Base location used to run rendezvous, typically `<sdo_bin_dir>/demo/rendezvous`
-* `<device_dir>`: Base location used to run device, typically `<sdo_bin_dir>/demo/device`
+* `<sdo-pri-root>`: Base location of the PRI source code
+* `<pri-rendezvous-dir>`: Base location used to run rendezvous, typically `<sdo-pri-root>/demo/rendezvous`
+* `<pri-device-dir>`: Base location used to run device, typically `<sdo-pri-root>/demo/device`
 
 ## Updating the proxy information (Optional)
 
@@ -93,9 +89,9 @@ Specify the combination of the hostname and port information together for either
 If no proxy needs to be specified, leave the fields blank.
 
 These properties are present in the following script files:
-* <ops_config_dir>/run-ops
-* <ocs_config_dir>/run-ocs
-* <to0scheduler_config_dir>/run-to0scheduler
+* <ops-config-dir>/run-ops
+* <ocs-config-dir>/run-ocs
+* <to0scheduler-config-dir>/run-to0scheduler
 
 ## Running the SDO IoT Platform SDK demo manually
 
@@ -103,31 +99,31 @@ Update the proxy information (if any) as per the steps outlined previously.
 
 Open a new terminal window and start the rendezvous service:
 ```
-$ cd <rendezvous_dir>
+$ cd <pri-rendezvous-dir>
 $ ./rendezvous
 ```
 
 Open a new terminal window and start the to0scheduler service:
 ```
-$ cd <to0scheduler_config_dir>
+$ cd <to0scheduler-config-dir>
 $ ./run-to0scheduler
 ```
 
 Open a new terminal window and start the ocs service:
 ```
-$ cd <ocs_config_dir>
+$ cd <ocs-config-dir>
 $ ./run-ocs
 ```
 
 Open a new terminal window and start the ops service:
 ```
-$ cd <ops_config_dir>
+$ cd <ops-config-dir>
 $ ./run-ops
 ```
 
 Open a new terminal window and start the device service:
 ```
-$ cd <device_dir>
+$ cd <pri-device-dir>
 $ ./device
 ```
 
@@ -140,22 +136,23 @@ Update the proxy information (if any) as per the steps outlined previously.
 
 Open a new terminal window and start the rendezvous service:
 ```
-$ cd <rendezvous_dir>
+$ cd <pri-rendezvous-dir>
 $ ./rendezvous
 ```
 
 Open a new terminal window and start the SDO IoT Platform SDK services:
 ```
-$ cd <sdo-iot-platform-sdk_root>/docker
+$ cd <sdo-iot-platform-sdk-root>/demo
 $ sudo docker-compose up
 ```
 
 Open a new terminal window and start the device service:
 ```
-$ cd <device_dir>
+$ cd <pri-device-dir>
 $ ./device
 ```
 
 NOTE: To re-trigger TO0 for a device for which TO0 was previously done and is currently active,
-please delete the file 'state.json' located at <ocs_config_dir>/db/v1/devices/<deviceID>/.
-For more details, refer to the README file provided in <demo_root>.
+please delete the file 'state.json' located at <ocs-config-dir>/db/v1/devices/<deviceID>/.
+
+For more details on configuration and setup, refer to <placeholder_for_docs_iot-platform-sdk>.

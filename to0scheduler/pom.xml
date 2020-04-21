@@ -19,32 +19,21 @@
   <packaging>pom</packaging>
   <url>file:///tmp/sdo</url>
 
-
   <parent>
     <groupId>org.sdo</groupId>
     <artifactId>iotplatformsdk</artifactId>
-    <version>1.7</version>
+    <version>1.8-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
-
-  <properties>
-  </properties>
-
 
   <modules>
     <module>libto0</module>
     <module>to0serviceimpl</module>
-    <module>to0client</module>
   </modules>
 
   <build>
-    <plugins>
-
-    </plugins>
-
     <pluginManagement>
       <plugins>
-
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
@@ -96,5 +85,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
 </project>

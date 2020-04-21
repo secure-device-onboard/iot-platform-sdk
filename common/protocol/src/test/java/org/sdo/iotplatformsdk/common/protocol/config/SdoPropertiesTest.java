@@ -46,14 +46,12 @@ import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To0;
 import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To0.OwnerSign;
 import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To0.OwnerSign.To0d;
 import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To0.OwnerSign.To1d;
-import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To0.OwnerSign.To1d.Bo;
 import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties.To2;
 import org.sdo.iotplatformsdk.common.protocol.types.CipherBlockMode;
 
 class SdoPropertiesTest {
 
   AppStart appStart;
-  Bo bo;
   CipherBlockMode cipherBlockMode;
   CredMfg credMfg;
   CredOwner credOwner;
@@ -95,7 +93,6 @@ class SdoPropertiesTest {
     ws = Duration.ofMillis(10000);
 
     appStart = new AppStart();
-    bo = new Bo();
     credMfg = new CredMfg();
     credOwner = new CredOwner();
     device = new Device();
@@ -128,18 +125,6 @@ class SdoPropertiesTest {
     appStart.setM("Test");
 
     appStart.getM();
-
-    /**
-     * Testing bean functions for Bo class
-     */
-
-    bo.setDns1("127.0.0.1");
-    bo.setI1(i1);
-    bo.setPort1(4028);
-
-    bo.getDns1();
-    bo.getI1();
-    bo.getPort1();
 
     /**
      * Testing bean functions for CredMfg class

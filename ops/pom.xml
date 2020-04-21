@@ -7,7 +7,6 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <description>SDO IoT Platform SDK - Owner Protocol Service</description>
   <groupId>org.sdo.iotplatformsdk</groupId>
   <artifactId>ops</artifactId>
@@ -18,23 +17,16 @@
   <parent>
     <groupId>org.sdo</groupId>
     <artifactId>iotplatformsdk</artifactId>
-    <version>1.7</version>
+    <version>1.8-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <modules>
     <module>restimpl</module>
     <module>libops</module>
-    <module>owner</module>
     <module>epid</module>
     <module>serviceinfo</module>
   </modules>
-
-  <properties>
-    <junit-jupiter-api.version>5.3.2</junit-jupiter-api.version>
-    <junit-jupiter-params.version>5.3.2</junit-jupiter-params.version>
-    <junit-jupiter-engine.version>5.3.2</junit-jupiter-engine.version>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -58,19 +50,19 @@
 
   <build>
     <pluginManagement>
-	  <plugins>
-       <!-- This plugin provides the capability to build jars. -->
-       <plugin>
-         <groupId>org.apache.maven.plugins</groupId>
-         <artifactId>maven-jar-plugin</artifactId>
-         <version>3.1.0</version>
-         <configuration>
-           <archive>
-             <manifestEntries>
-               <Sealed>true</Sealed>
-             </manifestEntries>
-           </archive>
-         </configuration>
+      <plugins>
+      <!-- This plugin provides the capability to build jars. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.0</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Sealed>true</Sealed>
+              </manifestEntries>
+            </archive>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

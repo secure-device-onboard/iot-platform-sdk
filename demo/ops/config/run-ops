@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Copyright 2020 Intel Corporation
+# SPDX-License-Identifier: Apache 2.0
+#
+# Specify the proxy here. For example, if the http proxy is 'http://myproxy.com:900',
+# then http_proxy_host would be 'myproxy.com' and http_proxy_port would be '900'.
+# If no proxies are needed, leave the fields empty.
+http_proxy_host=
+http_proxy_port=
+https_proxy_host=
+https_proxy_port=
+
+# The pattern to find the binary executable file
+bin_file=ops*.war
+
+# Base-directory where all binaries are found. This should be the base of the
+# folder to which binary package is extracted.
+base_dir=$(realpath ../..)
+
+# Find the absolute path of executable file.
+bin_path=$(find $base_dir -name $bin_file)
+
+# Run the executable file
+if [ -z "$bin_path" ]; then
+  echo "Couldn't find binary file. Please recheck binary package"
+else
+  exec java -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port -Dhttps.proxyHost=$https_proxy_host -Dhttps.proxyPort=$https_proxy_port -jar -Djava.library.path=$base_dir/sdo $bin_path
+fi
