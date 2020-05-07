@@ -155,4 +155,4 @@ $ ./device
 NOTE: To re-trigger TO0 for a device for which TO0 was previously done and is currently active,
 please delete the file 'state.json' located at <ocs-config-dir>/db/v1/devices/<deviceID>/.
 
-For more details on configuration and setup, refer to <placeholder_for_docs_iot-platform-sdk>.
+For more details on configuration and setup, refer to https://secure-device-onboard.github.io/docs/iot-platform-sdk/running-the-demo/.
