@@ -19,17 +19,15 @@ package org.sdo.iotplatformsdk.ops.to2library;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoErrorCode;
 import org.sdo.iotplatformsdk.common.rest.DeviceCryptoInfo;
@@ -37,18 +35,11 @@ import org.sdo.iotplatformsdk.common.rest.Message41Store;
 import org.sdo.iotplatformsdk.common.rest.Message45Store;
 import org.sdo.iotplatformsdk.common.rest.Message47Store;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
-import org.sdo.iotplatformsdk.ops.to2library.Message255Handler;
-import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
-import org.sdo.iotplatformsdk.ops.to2library.SimpleSessionStorage;
-import org.sdo.iotplatformsdk.ops.to2library.To2ErrorEvent;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message255HandlerTest {
 
-  static final SessionStorage sessions = new SimpleSessionStorage();
-  static final byte[] uuid = new byte[16];
+  SessionStorage sessions = Mockito.mock(SessionStorage.class);
+  byte[] uuid = new byte[16];
   String expectedVoucher = "{\"sz\":1,\"oh\":{\"pv\":113,\"pe\":3,\"r\":[2,[4,{\"dn\":"
       + "\"localhost\",\"only\":\"owner\",\"pow\":8040,\"pr\":\"http\"}],[4,{\"dn\":"
       + "\"localhost\",\"only\":\"dev\",\"po\":8040,\"pr\":\"http\"}]],\"g\":"
@@ -83,8 +74,8 @@ class Message255HandlerTest {
       + "dweQa7b/qDvS8+mnESeuWNHZXHhPWVwttCoAqB9tQqVakfRHSuihaUc+gyYmVTrp+OJ4TVf/U7I"
       + "U+7sL/k3n48zX+3dKHNEDZCpQ==\"]}]}";
 
-  @BeforeAll
-  static void beforeAll() {
+  @BeforeEach
+  void beforeEach() {
     final LongBuffer lbuf = ByteBuffer.wrap(uuid).asLongBuffer();
     lbuf.put(0xD10A59AC713347FCL);
     lbuf.put(0x9E457B33DB949F89L);
@@ -94,25 +85,18 @@ class Message255HandlerTest {
   void onPost_callsHandler() throws Exception {
 
     final LongBuffer lbuf = ByteBuffer.wrap(uuid).asLongBuffer();
-    sessions.store(new UUID(lbuf.get(), lbuf.get()),
-        new To2DeviceSessionInfo(
-            new Message41Store("", "", expectedVoucher, null, null, null, null, null, null, null),
-            new Message45Store(), new Message47Store(), new DeviceCryptoInfo()));
+    To2DeviceSessionInfo sessionInfo = new To2DeviceSessionInfo(
+        new Message41Store("", "", expectedVoucher, null, null, null, null, null, null, null),
+        new Message45Store(), new Message47Store(), new DeviceCryptoInfo());
+    Mockito.when(sessions.load(Mockito.any())).thenReturn(sessionInfo);
 
     AtomicBoolean flag = new AtomicBoolean(false);
-    Message255Handler h = new Message255Handler(sessions);
-    h.setOwnerEventHandler(event -> {
+    Message255Handler h = new Message255Handler(sessions, event -> {
       assertTrue(event instanceof To2ErrorEvent);
       assertTrue(null != ((To2ErrorEvent) event).getError());
       flag.set(true);
     });
-
-    RequestEntity<String> requestEntity = RequestEntity.post(URI.create("http://localhost"))
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-        .body("");
-
-    Callable<ResponseEntity<?>> responseEntity = h.onPostAsync(requestEntity);
-    responseEntity.call();
+    h.onPost("Error from cient", DatatypeConverter.printHexBinary(uuid));
     assertTrue(flag.get()); // make sure the callback fired
   }
 
@@ -120,26 +104,19 @@ class Message255HandlerTest {
   void onPost_parsesError() throws Exception {
 
     final LongBuffer lbuf = ByteBuffer.wrap(uuid).asLongBuffer();
-    sessions.store(new UUID(lbuf.get(), lbuf.get()),
-        new To2DeviceSessionInfo(
-            new Message41Store("", "", expectedVoucher, null, null, null, null, null, null, null),
-            new Message45Store(), new Message47Store(), new DeviceCryptoInfo()));
+    To2DeviceSessionInfo sessionInfo = new To2DeviceSessionInfo(
+        new Message41Store("", "", expectedVoucher, null, null, null, null, null, null, null),
+        new Message45Store(), new Message47Store(), new DeviceCryptoInfo());
+    Mockito.when(sessions.load(Mockito.any())).thenReturn(sessionInfo);
     final SdoError expected = new SdoError(SdoErrorCode.InternalError, 255, "test");
 
     AtomicBoolean flag = new AtomicBoolean(false);
-    Message255Handler h = new Message255Handler(sessions);
-    h.setOwnerEventHandler(event -> {
+    Message255Handler h = new Message255Handler(sessions, event -> {
       assertTrue(event instanceof To2ErrorEvent);
       assertEquals(expected, ((To2ErrorEvent) event).getError());
       flag.set(true);
     });
-
-    RequestEntity<String> requestEntity = RequestEntity.post(URI.create("http://localhost"))
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-        .body(expected.toString());
-
-    Callable<ResponseEntity<?>> responseEntity = h.onPostAsync(requestEntity);
-    responseEntity.call();
+    h.onPost(expected.toString(), DatatypeConverter.printHexBinary(uuid));
     assertTrue(flag.get()); // make sure the callback fired
   }
 }

@@ -14,20 +14,22 @@
 
 package org.sdo.iotplatformsdk.ops.epid;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Base64;
 
-import org.sdo.iotplatformsdk.common.protocol.rest.SdoRestTemplate;
+import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
+import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 public class EpidOnlineVerifier {
   private static final Logger mlog = LoggerFactory.getLogger(EpidOnlineVerifier.class);
@@ -72,14 +74,29 @@ public class EpidOnlineVerifier {
         + ",\"msg\":\"" + Base64.getEncoder().encodeToString(msg) + "\"" + ",\"epidSignature\":\""
         + Base64.getEncoder().encodeToString(signature) + "\"" + "}";
 
-    RequestEntity<String> requestEntity =
-        RequestEntity.post(uri).contentType(APPLICATION_JSON).body(blk);
+    final HttpClient httpClient;
+    try {
+      httpClient = HttpClient.newBuilder()
+          .sslContext(
+              new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
+          .build();
+    } catch (Exception e) {
+      return EpidLib.EpidStatus.kEpidErr.getValue();
+    }
+    final HttpRequest.Builder httpRequestBuilder =
+        HttpRequest.newBuilder().header("Content-Type", "application/json");
+    final HttpRequest httpRequest =
+        httpRequestBuilder.uri(uri).POST(BodyPublishers.ofString(blk)).build();
 
-    RestTemplate template = new SdoRestTemplate(EpidSecurityProvider.getHttpRequestFactory());
-    ResponseEntity<String> responseEntity = template.exchange(requestEntity, String.class);
+    HttpResponse<String> httpResponse;
+    try {
+      httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
+    } catch (IOException | InterruptedException e) {
+      return EpidLib.EpidStatus.kEpidErr.getValue();
+    }
 
     // Allow the logging of the different responses from the documentation
-    switch (responseEntity.getStatusCodeValue()) {
+    switch (httpResponse.statusCode()) {
       case 200:
         mlog.info("Online Verification - Successful");
         return EpidLib.EpidStatus.kEpidNoErr.getValue();
@@ -93,7 +110,7 @@ public class EpidOnlineVerifier {
         mlog.info("Online Verification - Outdated SigRl");
         return EpidLib.EpidStatus.kEpidErr.getValue();
       default:
-        mlog.info("Online Verification - Unknown Error: " + responseEntity.getStatusCodeValue());
+        mlog.info("Online Verification - Unknown Error: " + httpResponse.statusCode());
         return EpidLib.EpidStatus.kEpidErr.getValue();
     }
   }

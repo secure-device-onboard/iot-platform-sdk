@@ -17,31 +17,22 @@
 package org.sdo.iotplatformsdk.common.protocol.config;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.sdo.iotplatformsdk.common.protocol.config.SdoProperties;
-import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactoryBean;
 
 class SecureRandomFactoryBeanTest {
 
-  SdoProperties sdoProperties;
-  SecureRandomFactoryBean secureRandomFactoryBean;
+  SecureRandomFactory secureRandomFactoryBean;
 
   @BeforeEach
   void beforeEach() {
-
-    sdoProperties = new SdoProperties();
-    secureRandomFactoryBean = new SecureRandomFactoryBean();
+    secureRandomFactoryBean = new SecureRandomFactory();
   }
 
   @Test
   void test_getObject() throws IOException {
-
-    secureRandomFactoryBean.setProperties(sdoProperties);
-
-    secureRandomFactoryBean.getObject();
-    secureRandomFactoryBean.getObjectType();
-    secureRandomFactoryBean.getProperties();
+    SecureRandom random = secureRandomFactoryBean.getObject();
   }
 }

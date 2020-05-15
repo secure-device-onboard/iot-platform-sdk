@@ -19,7 +19,6 @@ package org.sdo.iotplatformsdk.ops.to2library;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -28,9 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +37,7 @@ import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
 import org.sdo.iotplatformsdk.common.protocol.types.PreServiceInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.PreServiceInfoEntry;
+import org.sdo.iotplatformsdk.common.protocol.types.SdoProtocolException;
 import org.sdo.iotplatformsdk.common.protocol.types.ServiceInfoEntry;
 import org.sdo.iotplatformsdk.common.rest.DeviceCryptoInfo;
 import org.sdo.iotplatformsdk.common.rest.Message41Store;
@@ -51,13 +48,6 @@ import org.sdo.iotplatformsdk.ops.serviceinfo.PreServiceInfoMultiSource;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoModule;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoMultiSource;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoSource;
-import org.sdo.iotplatformsdk.ops.to2library.KeyExchangeDecoder;
-import org.sdo.iotplatformsdk.ops.to2library.Message44Handler;
-import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message44HandlerTest {
 
@@ -70,8 +60,8 @@ class Message44HandlerTest {
   Message41Store message41Store;
   Message45Store message45Store;
   Message47Store message47Store;
-  RequestEntity<String> requestEntity;
-  RequestEntity<String> badequestEntity;
+  String requestEntity;
+  String badequestEntity;
   SecureRandom secureRandom;
   SessionStorage sessionStorage;
   Set<ServiceInfoModule> serviceInfoModules;
@@ -86,7 +76,6 @@ class Message44HandlerTest {
     deviceCryptoInfo = new DeviceCryptoInfo();
     epidOptions = new EpidOptionBean();
     keyExchangeDecoder = new KeyExchangeDecoder(asymKexCodec, secureRandom);
-    message44Handler = new Message44Handler();
     message41Store = new Message41Store("\"UOpomJjQ2KeXQJO44aGLYg==\"", "\"ECDH\"",
         "{\"sz\":1,\"oh\":{\"pv\":113,\"pe\":3,\"r\":[2,[4,{\"dn\":\"localhost\","
             + "\"only\":\"owner\",\"pow\":8040,\"pr\":\"http\"}],[4,{\"dn\":\"localhost\""
@@ -138,11 +127,11 @@ class Message44HandlerTest {
     to2DeviceSessionInfo.setMessage47Store(message47Store);
     to2DeviceSessionInfo.setDeviceCryptoInfo(deviceCryptoInfo);
 
+    Set<ServiceInfoModule> modules = new HashSet<ServiceInfoModule>();
+
+    message44Handler =
+        new Message44Handler(secureRandom, sessionStorage, keyExchangeDecoder, modules);
     message44Handler.setEpidOptions(epidOptions);
-    message44Handler.setSecureRandom(secureRandom);
-    message44Handler.setServiceInfoModules(serviceInfoModules);
-    message44Handler.setSessionStorage(sessionStorage);
-    message44Handler.setKeyExchangeDecoder(keyExchangeDecoder);
   }
 
   @Test
@@ -177,7 +166,7 @@ class Message44HandlerTest {
 
     modules.add(new TestModule());
 
-    PreServiceInfo preServiceInfo = Message44Handler.buildPreServiceInfo(id, modules);
+    PreServiceInfo preServiceInfo = message44Handler.buildPreServiceInfo(id, modules);
     assertEquals(1, preServiceInfo.size());
     assertEquals(valP, preServiceInfo.get(0).getValue());
   }
@@ -193,16 +182,8 @@ class Message44HandlerTest {
         + "EYCIQDgPU/UAQho8pe1C14OC5fljzpAiqC9sIHOsgSzGqF8awIhAJX4GgAU3rO"
         + "ZAH+y6ZraggY3KSYfRVtmAyJiujrHJx5W\"]}";
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "9")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message44);
     Mockito.when(sessionStorage.load(Mockito.any(UUID.class))).thenReturn(to2DeviceSessionInfo);
-
-    Callable<ResponseEntity<?>> message45 = message44Handler.onPostAsync(requestEntity);
-    message45.call();
+    message44Handler.onPost(message44, Mockito.anyString());
     message44Handler.getSecureRandom();
   }
 
@@ -216,15 +197,8 @@ class Message44HandlerTest {
         + "qLMjsRA=\"]},\"pk\":[0,0,[0]],\"sg\":[72,\"MEYCIQDgPU/UAQho8pe1C1"
         + "4OC5fljzpAiqC9sIHOsgSzGqF8awIhAJX4GgAU3rOZAH+y6ZraggY3KSYfRVtmAyJ" + "iujrHJx5W\"]}";
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "9")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message44);
-    Callable<ResponseEntity<?>> message45 = message44Handler.onPostAsync(requestEntity);
-    Assertions.assertThrows(IOException.class, () -> {
-      message45.call();
+    Assertions.assertThrows(SdoProtocolException.class, () -> {
+      message44Handler.onPost(message44, Mockito.anyString());
     });
   }
 

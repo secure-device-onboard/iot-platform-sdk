@@ -27,7 +27,6 @@ import java.util.Comparator;
 
 import org.sdo.iotplatformsdk.ocs.services.DataManager;
 import org.sdo.iotplatformsdk.ocs.services.DataObject;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Implements the DataManager interface to store and retrieve files.
@@ -35,8 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class FsDataManager implements DataManager {
 
   // path to file system root directory.
-  @Value("${fs.root.dir}")
-  private String rootDir;
+  private static final String rootDir = FsPropertiesLoader.getProperty("fs.root.dir");
 
   /*
    * Reads the specified file and returns the DataObject.

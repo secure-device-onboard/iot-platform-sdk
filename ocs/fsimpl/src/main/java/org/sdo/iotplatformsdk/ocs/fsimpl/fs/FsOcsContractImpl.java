@@ -87,17 +87,12 @@ import org.sdo.iotplatformsdk.common.rest.SignatureResponse;
 import org.sdo.iotplatformsdk.common.rest.SviMessage;
 import org.sdo.iotplatformsdk.common.rest.To0Request;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
-import org.sdo.iotplatformsdk.ocs.fsimpl.credsmanager.BouncyCastleSupplier;
-import org.sdo.iotplatformsdk.ocs.fsimpl.credsmanager.Signatures;
+import org.sdo.iotplatformsdk.ocs.fsimpl.rest.FsRestClient;
 import org.sdo.iotplatformsdk.ocs.services.DataManager;
 import org.sdo.iotplatformsdk.ocs.services.DataObject;
 import org.sdo.iotplatformsdk.ocs.services.OcsRestContract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 /**
  * A file-system based implementation of the {@link OcsRestContract}.
@@ -106,37 +101,30 @@ public class FsOcsContractImpl implements OcsRestContract {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FsOcsContractImpl.class);
   private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-  private @Nullable DataManager dataManager;
-  private ObjectMapper mapper;
+  private final DataManager dataManager;
+  private final ObjectMapper mapper;
+  private final FsRestClient fsRestClient;
 
-  @Value("${to0.waitseconds:3600}")
-  private int to0WaitSeconds;
-
-  @NonNull
-  @Value("${fs.root.dir}")
-  private String rootDir;
-
-  // path to owner keystore.
-  @Value("${fs.owner.keystore}")
-  private String ownerKeystoreDir;
-
-  // password of owner keystore and its underlying entries.
-  @Value("${fs.owner.keystore-password}")
-  private String ownerKeystorePwd;
-
-  @Value("${fs.devices.dir}")
-  private String devicesDir;
-
-  @Value("${fs.values.dir}")
-  private String valuesDir;
-
-  @Value("${to0.rest.api}")
-  private String to0RestApi;
-
-  @Value("${to2.credential-reuse.enabled:true}")
-  private boolean to2ReuseEnabled;
-
-  private FsRestClient fsRestClient;
+  private final int to0WaitSeconds = FsPropertiesLoader.getProperty("to0.waitseconds") != null
+      ? Integer.parseInt(FsPropertiesLoader.getProperty("to0.waitseconds"))
+      : 3600;
+  private final String rootDir = FsPropertiesLoader.getProperty("fs.root.dir");
+  //path to owner keystore.
+  private final String ownerKeystoreDir = FsPropertiesLoader.getProperty("fs.owner.keystore");
+  //password of owner keystore and its underlying entries.
+  private final String ownerKeystorePwd =
+      FsPropertiesLoader.getProperty("fs.owner.keystore-password");
+  private final String devicesDir = FsPropertiesLoader.getProperty("fs.devices.dir");
+  private final String valuesDir = FsPropertiesLoader.getProperty("fs.values.dir");
+  private final boolean to2ReuseEnabled =
+      FsPropertiesLoader.getProperty("to2.credential-reuse.enabled") != null
+          ? Boolean.getBoolean(FsPropertiesLoader.getProperty("to2.credential-reuse.enabled"))
+          : true;
+  // interval at which to0 scheduler will run repeatedly. Default: 60 seconds.
+  private final int toSchedulerInterval =
+      FsPropertiesLoader.getProperty("to0.scheduler.interval") != null
+          ? Integer.parseInt(FsPropertiesLoader.getProperty("to0.scheduler.interval"))
+          : 60;
 
   private static final String CIPHER = "RSA/NONE/OAEPWithSHA256AndMGF1Padding";
   private static final Character QUOTE = '"';
@@ -145,11 +133,12 @@ public class FsOcsContractImpl implements OcsRestContract {
 
   /**
    * The constructor is responsible for scheduling the the devices for TO0. It sends requests to
-   * To0Scheduler at a fixed interval.
-   *
-   * @param to0SchedulerInteval interval at which the scheduler will keep recurring.
+   * To0Scheduler at a fixed interval. It also initializes the necessary
    */
-  public FsOcsContractImpl(int to0SchedulerInteval) {
+  public FsOcsContractImpl(ObjectMapper mapper) {
+    this.fsRestClient = new FsRestClient();
+    this.dataManager = new FsDataManager();
+    this.mapper = mapper;
     scheduler.scheduleWithFixedDelay(new Runnable() {
 
       @Override
@@ -160,15 +149,10 @@ public class FsOcsContractImpl implements OcsRestContract {
           request.setWaitSeconds(String.valueOf(to0WaitSeconds));
           fsRestClient.postDevicesForTo0(request);
         } catch (Exception e) {
-          // nothing to do.
+          LOGGER.error("Error occurred at the scheduled executor service: " + e.getMessage());
         }
       }
-    }, 5, to0SchedulerInteval, TimeUnit.SECONDS);
-  }
-
-  @Autowired
-  public void setFsRestClient(FsRestClient fsRestClient) {
-    this.fsRestClient = fsRestClient;
+    }, 5, toSchedulerInterval, TimeUnit.SECONDS);
   }
 
   /*
@@ -822,26 +806,18 @@ public class FsOcsContractImpl implements OcsRestContract {
           }
         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       LOGGER.warn("Error occurred while checking for proxies ", e.getMessage());
       LOGGER.debug(e.getMessage(), e);
     }
     final String[] response = responseAsJson.stream().toArray(String[]::new);
+    LOGGER.debug("Scheduling the following devices for Transfer Ownership Protocol 0: "
+        + responseAsJson.toString());
     return response;
-  }
-
-  @Autowired
-  public void setDataManager(DataManager manager) {
-    dataManager = manager;
   }
 
   private DataManager getDataManager() {
     return dataManager;
-  }
-
-  @Autowired
-  public void setObjectMapper(ObjectMapper mapper) {
-    this.mapper = mapper;
   }
 
   private ObjectMapper getObjectMapper() {

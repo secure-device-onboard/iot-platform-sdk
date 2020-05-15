@@ -28,20 +28,18 @@ import org.sdo.iotplatformsdk.common.protocol.types.ServiceInfoEntry;
 import org.sdo.iotplatformsdk.common.rest.MessageEncoding;
 import org.sdo.iotplatformsdk.common.rest.ModuleMessage;
 import org.sdo.iotplatformsdk.common.rest.SviMessage;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.sdo.iotplatformsdk.ops.serviceinfo.PreServiceInfoMultiSource;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoMultiSink;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoMultiSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class OpsServiceInfoModule
     implements ServiceInfoMultiSource, ServiceInfoMultiSink, PreServiceInfoMultiSource {
 
-  private RestClient client;
+  private final RestClient client;
 
-  public OpsServiceInfoModule() {
-
+  public OpsServiceInfoModule(RestClient client) {
+    this.client = client;
   }
 
   /*
@@ -83,11 +81,6 @@ public class OpsServiceInfoModule
     }
 
     return list;
-  }
-
-  @Autowired
-  public void setClient(RestClient client) {
-    this.client = client;
   }
 
   private RestClient getClient() {

@@ -18,29 +18,22 @@ package org.sdo.iotplatformsdk.to0scheduler.to0library;
 
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.time.Duration;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import junit.framework.TestCase;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
-import org.sdo.iotplatformsdk.common.protocol.config.SimpleWaitSecondsBuilder;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxyHeader;
 import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInstr;
 
-@RunWith(JUnit4.class)
-public class To0ScheduledClientSessionTest extends TestCase {
+public class To0ScheduledClientSessionTest {
 
   To0ScheduledClientSession to0ScheduledClientSession;
 
@@ -56,8 +49,6 @@ public class To0ScheduledClientSessionTest extends TestCase {
 
   @Mock
   To0ClientSession to0ClientSession;
-  @Mock
-  SimpleWaitSecondsBuilder wsBuilder;
   @Mock
   To0SchedulerEvents eventHandler;
 
@@ -96,9 +87,10 @@ public class To0ScheduledClientSessionTest extends TestCase {
       + "eLsEwkpUSDT0hcnsJtZRf2kqtlr/suIrdweQa7b/qDvS8+mnESeuWNHZXHhPWVwttCoAq"
       + "B9tQqVakfRHSuihaUc+gyYmVTrp+OJ4TVf/U7IU+7sL/k3n48zX+3dKHNEDZCpQ==\"]}]}";
 
-  @SuppressWarnings("unchecked")
-  @Override
-  @Before
+  /**
+   * Setup method.
+   */
+  @BeforeEach
   public void setUp() {
     proxy = Mockito.mock(OwnershipProxy.class);
     proxyHeader = Mockito.mock(OwnershipProxyHeader.class);
@@ -106,10 +98,9 @@ public class To0ScheduledClientSessionTest extends TestCase {
     rendezvousInstr = Mockito.mock(RendezvousInstr.class);
     itr = Mockito.mock(Iterator.class);
     to0ClientSession = Mockito.mock(To0ClientSession.class);
-    wsBuilder = Mockito.mock(SimpleWaitSecondsBuilder.class);
     eventHandler = Mockito.mock(To0SchedulerEvents.class);
     to0ScheduledClientSession =
-        new To0ScheduledClientSession(proxy, to0ClientSession, wsBuilder, eventHandler);
+        new To0ScheduledClientSession(proxy, to0ClientSession, eventHandler);
 
     Mockito.when(proxy.getOh()).thenReturn(proxyHeader);
     Mockito.when(proxyHeader.getR()).thenReturn(rendezvousInfo);
@@ -122,15 +113,14 @@ public class To0ScheduledClientSessionTest extends TestCase {
   @Test
   public void testCallNoRendezvousInfo() {
     To0ClientSession actualTo0ClientSession = to0ScheduledClientSession.call();
-    Assert.assertEquals(to0ClientSession, actualTo0ClientSession);
+    Assertions.assertEquals(to0ClientSession, actualTo0ClientSession);
   }
 
   @Test()
   public void testCallNoProxy() {
-    to0ScheduledClientSession =
-        new To0ScheduledClientSession(null, to0ClientSession, wsBuilder, eventHandler);
+    to0ScheduledClientSession = new To0ScheduledClientSession(null, to0ClientSession, eventHandler);
     To0ClientSession actualTo0ClientSession = to0ScheduledClientSession.call();
-    Assert.assertEquals(to0ClientSession, actualTo0ClientSession);
+    Assertions.assertEquals(to0ClientSession, actualTo0ClientSession);
   }
 
   @Test
@@ -138,14 +128,12 @@ public class To0ScheduledClientSessionTest extends TestCase {
       throws IOException, ExecutionException, InterruptedException {
     OwnershipProxy ownershipProxy =
         new OwnershipProxyCodec.OwnershipProxyDecoder().decode(CharBuffer.wrap(expectedVoucher));
-    SimpleWaitSecondsBuilder builder = new SimpleWaitSecondsBuilder();
-    builder.setWaitSeconds(Duration.ofHours(1));
     to0ScheduledClientSession =
-        new To0ScheduledClientSession(ownershipProxy, to0ClientSession, builder, eventHandler);
+        new To0ScheduledClientSession(ownershipProxy, to0ClientSession, eventHandler);
     To0ClientSession actualTo0ClientSession = to0ScheduledClientSession.call();
-    Assert.assertEquals(to0ClientSession, actualTo0ClientSession);
+    Assertions.assertEquals(to0ClientSession, actualTo0ClientSession);
 
     actualTo0ClientSession = to0ScheduledClientSession.call();
-    Assert.assertEquals(to0ClientSession, actualTo0ClientSession);
+    Assertions.assertEquals(to0ClientSession, actualTo0ClientSession);
   }
 }

@@ -19,6 +19,8 @@ package org.sdo.iotplatformsdk.ops.opsimpl;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
+
 /**
  * Represents an ASCII encoding version of OpsCharSequence.
  */

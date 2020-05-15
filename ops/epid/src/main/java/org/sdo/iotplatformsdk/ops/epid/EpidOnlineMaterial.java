@@ -21,6 +21,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.ExecutionException;
@@ -32,15 +36,10 @@ import java.util.concurrent.TimeoutException;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.sdo.iotplatformsdk.common.protocol.rest.SdoRestTemplate;
+import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
+import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * EpidOnlineMaterial is a class to access the cryptographic material available
@@ -128,31 +127,35 @@ public class EpidOnlineMaterial {
       throw new RuntimeException(ex);
     }
 
-    RequestEntity<String> requestEntity = RequestEntity.method(HttpMethod.GET, uri)
-        .accept(MediaType.APPLICATION_OCTET_STREAM).body("");
-
-    RestTemplate template = new SdoRestTemplate(EpidSecurityProvider.getHttpRequestFactory());
-    Future<ResponseEntity<byte[]>> future =
-        executor.submit(() -> template.exchange(requestEntity, byte[].class));
-
-    final ResponseEntity<byte[]> responseEntity;
+    final HttpClient httpClient;
     try {
-      responseEntity = future.get(restTimeout.toMillis(), TimeUnit.MILLISECONDS);
+      httpClient = HttpClient.newBuilder()
+          .sslContext(new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
+          .build();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    final HttpRequest.Builder httpRequestBuilder =
+        HttpRequest.newBuilder().header("Accept", "application/octet-stream");
+    final HttpRequest httpRequest = httpRequestBuilder.uri(uri).GET().build();
+
+    final Future<HttpResponse<byte[]>> future =
+        executor.submit(() -> httpClient.send(httpRequest, BodyHandlers.ofByteArray()));
+
+    final HttpResponse<byte[]> httpResponse;
+    try {
+      httpResponse = future.get(restTimeout.toMillis(), TimeUnit.MILLISECONDS);
 
     } catch (ExecutionException e) {
-      if (e.getCause() instanceof ResourceAccessException) {
-        throw (ResourceAccessException) e.getCause();
-
-      } else {
-        throw new RuntimeException(e);
-      }
+      throw new RuntimeException(e);
     }
 
-    if (responseEntity.getStatusCode().is2xxSuccessful()) {
-      return responseEntity.hasBody() ? responseEntity.getBody() : new byte[0];
+    if (httpResponse.statusCode() == 200) {
+      return (null != httpResponse.body() && httpResponse.body().length != 0) ? httpResponse.body()
+          : new byte[0];
 
     } else {
-      throw new IOException(responseEntity.getStatusCode().getReasonPhrase());
+      throw new IOException(httpResponse.statusCode() + "");
     }
   }
 }

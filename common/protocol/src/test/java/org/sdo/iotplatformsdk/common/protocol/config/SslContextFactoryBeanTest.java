@@ -16,36 +16,26 @@
 
 package org.sdo.iotplatformsdk.common.protocol.config;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactoryBean;
-import org.springframework.beans.factory.ObjectFactory;
 
 class SslContextFactoryBeanTest {
 
   ObjectFactory<SecureRandom> secureRandomProvider;
-  SslContextFactoryBean sslContextFactoryBean;
+  SslContextFactory sslContextFactoryBean;
 
-  @SuppressWarnings("unchecked")
   @BeforeEach
-  void beforeEach() {
+  void beforeEach() throws Exception {
 
     secureRandomProvider = Mockito.mock(ObjectFactory.class);
-    sslContextFactoryBean = new SslContextFactoryBean();
+    sslContextFactoryBean = new SslContextFactory(secureRandomProvider.getObject());
   }
 
   @Test
-  void test_Bean() throws KeyManagementException, NoSuchAlgorithmException {
-
-    sslContextFactoryBean.setSecureRandomProvider(secureRandomProvider);
-
+  void test_Bean() throws Exception {
     sslContextFactoryBean.getObject();
-    sslContextFactoryBean.getObjectType();
-    sslContextFactoryBean.getSecureRandomProvider();
   }
 }

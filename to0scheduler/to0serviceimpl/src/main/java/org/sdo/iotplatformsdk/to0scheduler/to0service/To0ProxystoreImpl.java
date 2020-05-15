@@ -21,19 +21,18 @@ import java.nio.CharBuffer;
 
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0ProxyStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class To0ProxystoreImpl implements To0ProxyStore {
 
   protected static final Logger logger = LoggerFactory.getLogger(To0ProxystoreImpl.class);
 
-  private RestClient restClient;
+  private final RestClient restClient;
 
-  @Autowired
-  public void setRestClient(RestClient restClient) {
+  public To0ProxystoreImpl(RestClient restClient) {
     this.restClient = restClient;
   }
 
@@ -44,7 +43,7 @@ public class To0ProxystoreImpl implements To0ProxyStore {
   @Override
   public OwnershipProxy getProxy(final String deviceId) throws IOException {
     try {
-      logger.debug("Loading Ownership voucher for " + deviceId);
+      logger.info("Loading Ownership voucher for " + deviceId);
       final String voucher = restClient.getDeviceVoucher(deviceId);
       if (null == voucher) {
         logger.warn("Ownership voucher not found with uuid " + deviceId);

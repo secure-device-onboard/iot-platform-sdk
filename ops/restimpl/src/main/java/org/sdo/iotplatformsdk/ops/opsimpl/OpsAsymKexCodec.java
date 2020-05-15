@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
 import org.sdo.iotplatformsdk.common.rest.CipherOperation;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 
 public class OpsAsymKexCodec implements AsymKexCodec {
 
@@ -31,7 +32,7 @@ public class OpsAsymKexCodec implements AsymKexCodec {
   }
 
   @Override
-  public ByteBuffer buildDecipher(final String cipherAlgorithm, final ByteBuffer ct, UUID uuid) {
+  public ByteBuffer buildDecipher(final ByteBuffer ct, UUID uuid) {
     byte[] byteArray = new byte[ct.remaining()];
     ct.get(byteArray, 0, byteArray.length);
     byte[] b = restClient.cipherOperations(byteArray, CipherOperation.DECIPHER.toString(), uuid);
@@ -39,7 +40,7 @@ public class OpsAsymKexCodec implements AsymKexCodec {
   }
 
   @Override
-  public ByteBuffer buildEncipher(String cipherAlgorithm, ByteBuffer pt, UUID uuid) {
+  public ByteBuffer buildEncipher(ByteBuffer pt, UUID uuid) {
     byte[] byteArray = new byte[pt.remaining()];
     pt.get(byteArray, 0, byteArray.length);
     byte[] b = restClient.cipherOperations(byteArray, CipherOperation.ENCIPHER.toString(), uuid);

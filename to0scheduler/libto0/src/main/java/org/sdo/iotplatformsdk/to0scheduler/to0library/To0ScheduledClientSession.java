@@ -22,8 +22,6 @@ import java.time.Duration;
 import java.util.Iterator;
 
 import org.sdo.iotplatformsdk.common.protocol.codecs.SdoErrorCodec;
-import org.sdo.iotplatformsdk.common.protocol.config.SimpleWaitSecondsBuilder;
-import org.sdo.iotplatformsdk.common.protocol.rest.SdoUriComponentsBuilder;
 import org.sdo.iotplatformsdk.common.protocol.types.MessageType;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInstr;
@@ -39,7 +37,6 @@ public class To0ScheduledClientSession {
 
   private final OwnershipProxy proxy;
   private final To0ClientSession to0Session;
-  private SimpleWaitSecondsBuilder wsBuilder;
   private To0SchedulerEvents eventHandler;
 
   /**
@@ -47,13 +44,12 @@ public class To0ScheduledClientSession {
    *
    * @param proxy      The {@link OwnershipProxy} instance.
    * @param to0Session The {@link To0ClientSession} instance.
-   * @param wsBuilder  The {@link SimpleWaitSecondsBuilder} instance.
+   * @param eventHandler  The {@link To0SchedulerEvents} instance.
    */
   public To0ScheduledClientSession(OwnershipProxy proxy, To0ClientSession to0Session,
-      SimpleWaitSecondsBuilder wsBuilder, To0SchedulerEvents eventHandler) {
+      To0SchedulerEvents eventHandler) {
     this.proxy = proxy;
     this.to0Session = to0Session;
-    this.wsBuilder = wsBuilder;
     this.eventHandler = eventHandler;
   }
 
@@ -86,8 +82,7 @@ public class To0ScheduledClientSession {
             }
 
             try {
-              to0Session.setWaitSecondsBuilder(wsBuilder);
-              final Duration wsDuration = to0Session.run(proxy, new SdoUriComponentsBuilder(uri));
+              final Duration wsDuration = to0Session.run(proxy, uri);
               getEventHandler().onSuccess(getProxy(), wsDuration);
               return to0Session;
             } catch (Exception e) {

@@ -34,6 +34,7 @@ import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoErrorCode;
 import org.sdo.iotplatformsdk.common.rest.DeviceState;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 
 @RunWith(JUnit4.class)
 public class To0SchedulerEventsImplTest extends TestCase {
@@ -89,8 +90,7 @@ public class To0SchedulerEventsImplTest extends TestCase {
     ownershipProxy =
         new OwnershipProxyCodec.OwnershipProxyDecoder().decode(CharBuffer.wrap(expectedVoucher));
 
-    demoSchedulerEventHandler = new To0SchedulerEventsImpl();
-    demoSchedulerEventHandler.setRestClient(restClient);
+    demoSchedulerEventHandler = new To0SchedulerEventsImpl(restClient);
 
     Mockito.when(sdoError.getEm()).thenReturn("Error message");
     Mockito.when(sdoError.getEmsg()).thenReturn(255);

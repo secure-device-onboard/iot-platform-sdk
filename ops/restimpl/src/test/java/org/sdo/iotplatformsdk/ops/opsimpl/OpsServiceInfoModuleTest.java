@@ -35,8 +35,7 @@ import org.sdo.iotplatformsdk.common.rest.MessageEncoding;
 import org.sdo.iotplatformsdk.common.rest.ModuleMessage;
 import org.sdo.iotplatformsdk.common.rest.SviMessage;
 import org.sdo.iotplatformsdk.common.rest.SviMessageType;
-import org.sdo.iotplatformsdk.ops.opsimpl.OpsServiceInfoModule;
-import org.sdo.iotplatformsdk.ops.opsimpl.RestClient;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 
 @RunWith(JUnit4.class)
 public class OpsServiceInfoModuleTest extends TestCase {
@@ -57,8 +56,7 @@ public class OpsServiceInfoModuleTest extends TestCase {
 
   @Test()
   public void testGetServiceInfo() {
-    opsServiceInfoModule = new OpsServiceInfoModule();
-    opsServiceInfoModule.setClient(restClient);
+    opsServiceInfoModule = new OpsServiceInfoModule(restClient);
 
     SviMessage[] messages = new SviMessage[0];
     Mockito.when(restClient.getMessage(uuid.toString())).thenReturn(messages);
@@ -89,8 +87,7 @@ public class OpsServiceInfoModuleTest extends TestCase {
   @Test(expected = Exception.class)
   public void testGetServiceInfoEmptyMessage() throws Exception {
 
-    opsServiceInfoModule = new OpsServiceInfoModule();
-    opsServiceInfoModule.setClient(restClient);
+    opsServiceInfoModule = new OpsServiceInfoModule(restClient);
     SviMessage[] messages = new SviMessage[1];
 
     SviMessage message = new SviMessage();
@@ -102,8 +99,7 @@ public class OpsServiceInfoModuleTest extends TestCase {
   @Test(expected = RuntimeException.class)
   public void testGetServiceInfoInvalidEnc() throws Exception {
 
-    opsServiceInfoModule = new OpsServiceInfoModule();
-    opsServiceInfoModule.setClient(restClient);
+    opsServiceInfoModule = new OpsServiceInfoModule(restClient);
     SviMessage[] messages = new SviMessage[1];
 
     SviMessage message = new SviMessage();
@@ -115,8 +111,7 @@ public class OpsServiceInfoModuleTest extends TestCase {
 
   @Test
   public void testGetPreServiceInfo() {
-    opsServiceInfoModule = new OpsServiceInfoModule();
-    opsServiceInfoModule.setClient(restClient);
+    opsServiceInfoModule = new OpsServiceInfoModule(restClient);
 
     ModuleMessage[] messages = new ModuleMessage[0];
     Mockito.when(restClient.getPsi(uuid.toString())).thenReturn(messages);
@@ -149,8 +144,7 @@ public class OpsServiceInfoModuleTest extends TestCase {
   @SuppressWarnings("unchecked")
   @Test
   public void testPutServiceInfo() {
-    opsServiceInfoModule = new OpsServiceInfoModule();
-    opsServiceInfoModule.setClient(restClient);
+    opsServiceInfoModule = new OpsServiceInfoModule(restClient);
     ModuleMessage message = new ModuleMessage();
     message.setModule(SviMessageType.MODULE.toString());
     message.setMsg("active");

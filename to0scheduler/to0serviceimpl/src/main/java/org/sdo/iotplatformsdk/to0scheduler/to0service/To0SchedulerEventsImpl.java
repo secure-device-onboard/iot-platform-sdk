@@ -24,10 +24,10 @@ import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.rest.DeviceState;
 import org.sdo.iotplatformsdk.common.rest.Iso8061Timestamp;
 import org.sdo.iotplatformsdk.common.rest.ProtocolError;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0SchedulerEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Implements To0SchedulerEvents to update the device state.
@@ -37,14 +37,11 @@ public class To0SchedulerEventsImpl implements To0SchedulerEvents {
 
   protected static final Logger logger = LoggerFactory.getLogger(To0SchedulerEventsImpl.class);
 
-  private RestClient restClient;
+  private final RestClient restClient;
 
-  @Autowired
-  public void setRestClient(RestClient restClient) {
+  public To0SchedulerEventsImpl(RestClient restClient) {
     this.restClient = restClient;
   }
-
-  public To0SchedulerEventsImpl() {}
 
   /*
    * This method updates the registration time-stamp and wait seconds for the input {@link
