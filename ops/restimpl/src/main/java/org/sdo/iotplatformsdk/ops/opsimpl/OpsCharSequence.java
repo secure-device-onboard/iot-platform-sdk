@@ -18,6 +18,8 @@ package org.sdo.iotplatformsdk.ops.opsimpl;
 
 import java.util.UUID;
 
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
+
 public abstract class OpsCharSequence implements CharSequence {
 
   private final RestClient client;

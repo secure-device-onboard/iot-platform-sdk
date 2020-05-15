@@ -16,21 +16,20 @@
 
 package org.sdo.iotplatformsdk.common.protocol.rest;
 
-import java.net.URI;
-
-import org.springframework.web.util.UriComponentsBuilder;
+import org.sdo.iotplatformsdk.common.protocol.types.Version;
 
 /**
- * A {@link UriComponentsBuilder} configured for SDO REST paths.
+ * Return the configured SDO REST path.
  */
-public class SdoUriComponentsBuilder extends UriComponentsBuilder {
+public abstract class SdoUriComponentsBuilder {
 
-  public SdoUriComponentsBuilder(final URI uri) {
-    this(uri.getScheme(), uri.getHost(), uri.getPort());
-  }
-
-  public SdoUriComponentsBuilder(final String scheme, final String host, final int port) {
-    super();
-    this.scheme(scheme).host(host).port(port).path("/mp/{version}/msg/{message}");
+  /**
+   * Returns the SDO REST path for the particular message ID.
+   *
+   * @param id number of Protocol message
+   * @return   path as String
+   */
+  public static String path(Integer id) {
+    return "/mp/" + Version.VERSION_1_13 + "/msg/" + id.intValue();
   }
 }

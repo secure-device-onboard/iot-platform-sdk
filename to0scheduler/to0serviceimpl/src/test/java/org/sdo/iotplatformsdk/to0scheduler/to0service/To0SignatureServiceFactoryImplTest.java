@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.types.SignatureBlock;
 import org.sdo.iotplatformsdk.common.rest.SignatureResponse;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 
 @RunWith(JUnit4.class)
 public class To0SignatureServiceFactoryImplTest extends TestCase {
@@ -72,8 +73,7 @@ public class To0SignatureServiceFactoryImplTest extends TestCase {
     uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
     hints = new UUID[1];
     hints[0] = uuid;
-    demoSignatureServiceFactory = new To0SignatureServiceFactoryImpl();
-    demoSignatureServiceFactory.setRestClient(restClient);
+    demoSignatureServiceFactory = new To0SignatureServiceFactoryImpl(restClient);
     Mockito.when(restClient.signatureOperation(uuid, bo)).thenReturn(signatureResponse);
     // Return real values as the test will fail otherwise.
     Mockito.when(signatureResponse.getAlg()).thenReturn("RSA");

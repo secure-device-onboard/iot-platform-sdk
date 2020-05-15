@@ -18,45 +18,30 @@ package org.sdo.iotplatformsdk.ops.to2library;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.sdo.iotplatformsdk.common.protocol.codecs.Codec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To2OpNextEntryCodec;
+import org.sdo.iotplatformsdk.common.protocol.types.SdoProtocolException;
 import org.sdo.iotplatformsdk.common.protocol.types.SignatureBlock;
 import org.sdo.iotplatformsdk.common.protocol.types.To2OpNextEntry;
 import org.sdo.iotplatformsdk.common.rest.Message41Store;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
-import org.sdo.iotplatformsdk.ops.to2library.Message42Handler;
-import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
-import org.sdo.iotplatformsdk.ops.to2library.To2ProvingOwner;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message42HandlerTest {
 
   byte[] uuid;
   int enn;
-  Codec<SignatureBlock> codecSignatureBlock;
-  Codec<SignatureBlock>.Encoder codecSignatureBlockEncoder;
-  Codec<Number> codecNumber;
-  Codec<Number>.Encoder codecNumberEncoder;
   List<SignatureBlock> listSignatureBlock;
   SessionStorage sessions;
   Message42Handler message42Handler;
   // OwnershipProxy ownershipProxy;
-  RequestEntity<String> requestEntity;
+  String requestEntity;
   SignatureBlock signatureBlock;
   String message42;
   To2OpNextEntry to2OpNextEntry;
@@ -70,10 +55,6 @@ class Message42HandlerTest {
   @BeforeEach
   void beforeEach() throws IOException {
 
-    codecNumber = Mockito.mock(Codec.class);
-    codecNumberEncoder = Mockito.mock(Codec.Encoder.class);
-    codecSignatureBlock = Mockito.mock(Codec.class);
-    codecSignatureBlockEncoder = Mockito.mock(Codec.Encoder.class);
     enn = 0;
     listSignatureBlock = Mockito.mock(List.class);
     ownershipProxy = "{\"sz\":1,\"oh\":{\"pv\":113,\"pe\":3,\"r\":[2,[4,{\"dn\":"
@@ -122,41 +103,23 @@ class Message42HandlerTest {
 
     Mockito.when(sessions.load(Mockito.any(UUID.class))).thenReturn(to2deviceSessionInfo);
     Mockito.when(listSignatureBlock.get(Mockito.anyInt())).thenReturn(signatureBlock);
-    Mockito.when(codecSignatureBlock.encoder()).thenReturn(codecSignatureBlockEncoder);
     Mockito.when(to2OpNextEntry.getEni()).thenReturn(signatureBlock);
     Mockito.when(signatureBlock.getSg()).thenReturn(ByteBuffer.allocate(256));
-    Mockito.when(codecNumber.encoder()).thenReturn(codecNumberEncoder);
 
-    message42Handler = new Message42Handler();
-    message42Handler.setSessionStorage(sessions);
-
+    message42Handler = new Message42Handler(sessions);
   }
 
   @Test
   void test_Message42() throws Exception {
     message42 = "{\"enn\":" + enn + "}";
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "9")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message42);
-    Callable<ResponseEntity<?>> message43 = message42Handler.onPostAsync(requestEntity);
-    message43.call();
+    String message43 = message42Handler.onPost(message42, Mockito.anyString());
   }
 
   @Test
   void test_Message42_BadRequest() {
     message42 = "{\"enn\":" + "notAnInt" + "}";
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "9")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message42);
-    Callable<ResponseEntity<?>> message43 = message42Handler.onPostAsync(requestEntity);
-    Assertions.assertThrows(IOException.class, () -> {
-      message43.call();
+    Assertions.assertThrows(SdoProtocolException.class, () -> {
+      message42Handler.onPost(message42, Mockito.anyString());
     });
 
   }

@@ -93,7 +93,7 @@ public abstract class AsymmetricKeyExchange implements KeyExchange {
 
   // xB is B, enciphered with the owner's key.
   public void setXb(ByteBuffer xb) {
-    final ByteBuffer buf = cipherFactory.buildDecipher(CIPHER, xb, getUuid());
+    final ByteBuffer buf = cipherFactory.buildDecipher(xb, getUuid());
     setB(buf);
   }
 

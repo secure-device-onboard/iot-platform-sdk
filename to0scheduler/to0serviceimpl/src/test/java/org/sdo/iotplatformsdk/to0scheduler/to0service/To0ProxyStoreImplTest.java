@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 
 @RunWith(JUnit4.class)
 public class To0ProxyStoreImplTest extends TestCase {
@@ -82,8 +83,7 @@ public class To0ProxyStoreImplTest extends TestCase {
   @Test
   public void testGetProxy() throws IOException {
 
-    demoProxystore = new To0ProxystoreImpl();
-    demoProxystore.setRestClient(restClient);
+    demoProxystore = new To0ProxystoreImpl(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
     Mockito.when(restClient.getDeviceVoucher(uuid.toString())).thenReturn(expectedVoucher);
     OwnershipProxy actualProxy = demoProxystore.getProxy(uuid.toString());
@@ -101,8 +101,7 @@ public class To0ProxyStoreImplTest extends TestCase {
   @Test
   public void testGetNoProxy() throws IOException {
 
-    demoProxystore = new To0ProxystoreImpl();
-    demoProxystore.setRestClient(restClient);
+    demoProxystore = new To0ProxystoreImpl(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
 
     Mockito.when(restClient.getDeviceVoucher(uuid.toString())).thenReturn(null);
@@ -114,8 +113,7 @@ public class To0ProxyStoreImplTest extends TestCase {
   @Test(expected = IOException.class)
   public void testGetBadProxyField() throws IOException {
 
-    demoProxystore = new To0ProxystoreImpl();
-    demoProxystore.setRestClient(restClient);
+    demoProxystore = new To0ProxystoreImpl(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
     expectedVoucher = expectedVoucher.replaceFirst("oh", "o");
 

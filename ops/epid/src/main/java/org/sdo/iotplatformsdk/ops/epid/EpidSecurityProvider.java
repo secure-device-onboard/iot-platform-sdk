@@ -17,14 +17,16 @@
 package org.sdo.iotplatformsdk.ops.epid;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
 
+import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
+import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 @SuppressWarnings("serial")
 public class EpidSecurityProvider extends Provider {
@@ -33,14 +35,17 @@ public class EpidSecurityProvider extends Provider {
   public static final String PROVIDER_INFO =
       "https://software.intel.com/en-us/articles/intel-enhanced-privacy-id-epid-security-technology";
   public static final String PROVIDER_NAME = "EPID";
-  private static ClientHttpRequestFactory httpRequestFactory = new SimpleClientHttpRequestFactory();
+  private static HttpClient httpClient;
   private static String epidOnlineHostUrl;
   private static final Logger mlog = LoggerFactory.getLogger(EpidLib.class);
   private static EpidLib epidLib;
 
   @SuppressWarnings("deprecation")
-  private EpidSecurityProvider() {
+  private EpidSecurityProvider() throws NoSuchAlgorithmException {
     super(PROVIDER_NAME, 1.0, PROVIDER_INFO);
+    httpClient = HttpClient.newBuilder()
+        .sslContext(new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
+        .build();
     putService(new Provider.Service(this, "Signature", ALGORITHM,
         EpidSignatureSpi.class.getCanonicalName(),
         Arrays.asList("EPIDV1_0", "EPIDV1_1", "EPIDV2_0"), null));
@@ -59,23 +64,15 @@ public class EpidSecurityProvider extends Provider {
     return epidLib;
   }
 
-  public static void setHttpRequestFactory(ClientHttpRequestFactory requestFactory) {
-    httpRequestFactory = requestFactory;
-  }
-
-  public static ClientHttpRequestFactory getHttpRequestFactory() {
-    return httpRequestFactory;
-  }
-
   /**
    * If epid backend url specified then overwrite default. testMode sets the url to
    * the sandbox but testmode is only applicable if host url not specified.
    *
-   * @param url epid online url
-   * @param testMode          whether epid test urls is to be used
+   * @param url      epid online url
+   * @param testMode whether epid test urls is to be used
    */
   public static void setEpidOptions(String url, boolean testMode) {
-    if (!url.isEmpty()) {
+    if (null != url && !url.isEmpty()) {
       epidOnlineHostUrl = url;
     } else if (testMode) {
       epidOnlineHostUrl = EpidConstants.sandboxEpidUrlDefault;
@@ -102,8 +99,9 @@ public class EpidSecurityProvider extends Provider {
    * <p>This method is idempotent, and may be called repeatedly without side effect.
    *
    * @return The EPID JCE provider.
+   * @throws NoSuchAlgorithmException when exception is thrown.
    */
-  public static Provider load() {
+  public static Provider load() throws NoSuchAlgorithmException {
     Provider provider = Security.getProvider(PROVIDER_NAME);
 
     if (null == provider) {

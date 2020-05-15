@@ -22,6 +22,7 @@ import org.sdo.iotplatformsdk.common.rest.DeviceState;
 import org.sdo.iotplatformsdk.common.rest.DeviceStateType;
 import org.sdo.iotplatformsdk.common.rest.Iso8061Timestamp;
 import org.sdo.iotplatformsdk.common.rest.ProtocolError;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.sdo.iotplatformsdk.ops.to2library.OwnerEvent;
 import org.sdo.iotplatformsdk.ops.to2library.OwnerEventHandler;
 import org.sdo.iotplatformsdk.ops.to2library.To2BeginEvent;

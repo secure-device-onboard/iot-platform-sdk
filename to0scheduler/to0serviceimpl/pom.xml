@@ -24,10 +24,6 @@
     <version>1.9-SNAPSHOT</version>
   </parent>
 
-  <properties>
-    <start-class>org.sdo.iotplatformsdk.to0scheduler.to0service.To0ServiceApplication</start-class>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -55,11 +51,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-test</artifactId>
         <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
     </dependency>
   </dependencies>
 

@@ -16,14 +16,12 @@ package org.sdo.iotplatformsdk.ops.to2library;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -33,19 +31,15 @@ import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.codecs.Codec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.SignatureBlockCodec;
 import org.sdo.iotplatformsdk.common.protocol.config.OwnershipProxyStorage;
-import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactoryBean;
+import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
 import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureService;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
-import org.sdo.iotplatformsdk.common.protocol.security.SimpleAsymKexCodec;
 import org.sdo.iotplatformsdk.common.protocol.security.keyexchange.EcdhKeyExchange;
 import org.sdo.iotplatformsdk.common.protocol.security.keyexchange.KeyExchange;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.SignatureBlock;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message40HandlerTest {
 
@@ -59,9 +53,9 @@ class Message40HandlerTest {
   OwnerEventHandler ownerEventHandler;
   OwnershipProxyStorage ownershipProxyStorage;
   OwnershipProxy ownershipProxy;
-  RequestEntity<String> requestEntity;
+  String requestEntity;
   SecureRandom random;
-  SecureRandomFactoryBean secureRandom;
+  SecureRandomFactory secureRandom;
   SessionStorage sessionStorage;
   SignatureBlock signatureBlock;
   SignatureBlockCodec signatureBlockCodec;
@@ -75,7 +69,7 @@ class Message40HandlerTest {
 
   @SuppressWarnings("unchecked")
   @BeforeEach
-  void beforeEach() {
+  void beforeEach() throws IOException {
 
     KeyPairGenerator kpg;
     try {
@@ -86,16 +80,16 @@ class Message40HandlerTest {
       // do nothing.
     }
 
-    asymKexCodec = new SimpleAsymKexCodec(keys, random);
+    asymKexCodec = Mockito.mock(AsymKexCodec.class);
     codecSignatureBlock = Mockito.mock(Codec.Encoder.class);
     en = Mockito.mock(Codec.Encoder.class);
     futureSignatureBlock = Mockito.mock(Future.class);
     ownershipProxyStorage = Mockito.mock(OwnershipProxyStorage.class);
     ownershipProxy = new OwnershipProxy();
-    ownerEventHandler = new SimpleOwnerEventHandler();
+    ownerEventHandler = Mockito.mock(OwnerEventHandler.class);
     random = new SecureRandom();
-    secureRandom = new SecureRandomFactoryBean();
-    sessionStorage = new SimpleSessionStorage();
+    secureRandom = new SecureRandomFactory();
+    sessionStorage = Mockito.mock(SessionStorage.class);
     sgLenCodec = Mockito.mock(Codec.class);
     signatureBlock = Mockito.mock(SignatureBlock.class);
     signatureBlockCodec = Mockito.mock(SignatureBlockCodec.class);
@@ -106,23 +100,13 @@ class Message40HandlerTest {
     writer = new StringWriter();
     keyExchange = new EcdhKeyExchange.P256(random);
 
-    message40Handler = new Message40Handler(signatureServiceFactory);
-    message40Handler.setOwnerEventHandler(ownerEventHandler);
-    message40Handler.setOwnershipProxyStorage(ownershipProxyStorage);
-    message40Handler.setSecureRandom(random);
-    message40Handler.setSessionStorage(sessionStorage);
-    message40Handler.setKeyExchangeDecoder(keyExchangeDecoder);
+    message40Handler = new Message40Handler(signatureServiceFactory, ownerEventHandler,
+        ownershipProxyStorage, random, sessionStorage, keyExchangeDecoder);
 
     message40 = "{\"g2\":\"C0YHMh2qTlK803RUYmgk6g==\",\"n5\":\""
         + "QkJNMS58CqbtZqalTnxbDg==\",\"pe\":3,\"kx\":\"ECDH\","
-        + "\"cs\":\"AES128/CTR/HMAC-SHA256\",\"iv\":[12,\"XI6uEtjZc6bK/3kM\"]"
-        + ",\"eA\":[13,0,\"\"]}";
+        + "\"cs\":\"AES128/CTR/HMAC-SHA256\",\"eA\":[13,0,\"\"]}";
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "158")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message40);
   }
 
   /**
@@ -141,9 +125,9 @@ class Message40HandlerTest {
     Mockito.when(signatureBlock.getSg()).thenReturn(ByteBuffer.allocate(256));
     Mockito.when(sgLenCodec.encoder()).thenReturn(en);
 
-    Callable<ResponseEntity<?>> message41 = message40Handler.onPostAsync(requestEntity);
+    String message41 = message40Handler.onPost(message40);
     try {
-      message41.call();
+      message40Handler.onPost(message40);
     } catch (Exception e) {
       // do nothing.
     }
@@ -152,9 +136,9 @@ class Message40HandlerTest {
   @Test
   void test_Message40_BadRequest() {
 
-    Callable<ResponseEntity<?>> message41 = message40Handler.onPostAsync(requestEntity);
+    String message41;
     try {
-      message41.call();
+      message40Handler.onPost(requestEntity);
     } catch (Exception e) {
       // do nothing.
     }

@@ -26,15 +26,14 @@ import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInstr;
 import org.sdo.iotplatformsdk.common.rest.RendezvousInstruction;
 import org.sdo.iotplatformsdk.common.rest.SetupInfoResponse;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.sdo.iotplatformsdk.ops.to2library.SetupDeviceService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class OpsSetupDeviceServiceInfo implements SetupDeviceService {
 
-  private RestClient restClient;
+  private final RestClient restClient;
 
-  @Autowired
-  public void setRestClient(RestClient restClient) {
+  public OpsSetupDeviceServiceInfo(RestClient restClient) {
     this.restClient = restClient;
   }
 

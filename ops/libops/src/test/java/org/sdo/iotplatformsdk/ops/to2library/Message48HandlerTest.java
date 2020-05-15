@@ -16,16 +16,13 @@
 
 package org.sdo.iotplatformsdk.ops.to2library;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
-import javax.xml.bind.DatatypeConverter;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,6 +30,7 @@ import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
 import org.sdo.iotplatformsdk.common.protocol.security.cipher.To2CipherContext;
 import org.sdo.iotplatformsdk.common.protocol.types.CipherText;
 import org.sdo.iotplatformsdk.common.protocol.types.EncryptedMessage;
+import org.sdo.iotplatformsdk.common.protocol.types.SdoProtocolException;
 import org.sdo.iotplatformsdk.common.protocol.types.To2CipherHashMac;
 import org.sdo.iotplatformsdk.common.rest.DeviceCryptoInfo;
 import org.sdo.iotplatformsdk.common.rest.Message41Store;
@@ -40,13 +38,6 @@ import org.sdo.iotplatformsdk.common.rest.Message45Store;
 import org.sdo.iotplatformsdk.common.rest.Message47Store;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoModule;
-import org.sdo.iotplatformsdk.ops.to2library.KeyExchangeDecoder;
-import org.sdo.iotplatformsdk.ops.to2library.Message48Handler;
-import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message48HandlerTest {
 
@@ -61,7 +52,7 @@ class Message48HandlerTest {
   Message45Store message45Store;
   Message47Store message47Store;
   Message48Handler message48Handler;
-  RequestEntity<String> requestEntity;
+  String requestEntity;
   SecureRandom secureRandom;
   Set<ServiceInfoModule> serviceInfoModules;
   SessionStorage sessionStorage;
@@ -82,7 +73,6 @@ class Message48HandlerTest {
     encryptedMessage = Mockito.mock(EncryptedMessage.class);
     keyExchangeDecoder = new KeyExchangeDecoder(asymKexCodec, secureRandom);
     message47Store = new Message47Store();
-    message48Handler = new Message48Handler();
     ownerCipherContext = Mockito.mock(To2CipherContext.class);
     serviceInfoModules = new HashSet<ServiceInfoModule>();
     sessionStorage = Mockito.mock(SessionStorage.class);
@@ -134,9 +124,8 @@ class Message48HandlerTest {
         "[86,\"ACAdArDxkfqqb5lkS9O1A1RsABXNgMRMxPXB9C0dzOP3UQAgFA8l+H+MPGNnVQ5ZSOV94F"
             + "ckW4VX6AO5o1sN+7suu2YAEBfl7G7cTRlDYQV5qLMjsRA=\"]");
 
-    message48Handler.setServiceInfoModules(serviceInfoModules);
-    message48Handler.setSessionStorage(sessionStorage);
-    message48Handler.setKeyExchangeDecoder(keyExchangeDecoder);
+    message48Handler =
+        new Message48Handler(sessionStorage, secureRandom, keyExchangeDecoder, serviceInfoModules);
   }
 
   // @Test
@@ -155,28 +144,16 @@ class Message48HandlerTest {
     Mockito.when(encryptedMessage.getHmac()).thenReturn(hashMac);
     Mockito.when(ownerCipherContext.write(Mockito.any())).thenReturn(encryptedMessage);
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "90")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message48);
-    Callable<ResponseEntity<?>> message49 = message48Handler.onPostAsync(requestEntity);
-    message49.call();
+    String message49 = message48Handler.onPost(message48, Mockito.anyString());
   }
 
   @Test
   void test_Message48_BadRequest() throws Exception {
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "90")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message48);
     Mockito.when(sessionStorage.load(Mockito.any(UUID.class))).thenReturn(to2DeviceSessionInfo);
 
-    Callable<ResponseEntity<?>> message49 = message48Handler.onPostAsync(requestEntity);
-    message49.call();
+    Assertions.assertThrows(SdoProtocolException.class, () -> {
+      String message49 = message48Handler.onPost(message48, UUID.randomUUID().toString());
+    });
   }
 }

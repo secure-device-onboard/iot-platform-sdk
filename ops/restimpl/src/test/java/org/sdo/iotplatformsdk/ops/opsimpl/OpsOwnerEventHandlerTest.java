@@ -34,7 +34,7 @@ import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoErrorCode;
 import org.sdo.iotplatformsdk.common.rest.DeviceState;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsOwnerEventHandler;
-import org.sdo.iotplatformsdk.ops.opsimpl.RestClient;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.sdo.iotplatformsdk.ops.to2library.To2BeginEvent;
 import org.sdo.iotplatformsdk.ops.to2library.To2EndEvent;
 import org.sdo.iotplatformsdk.ops.to2library.To2ErrorEvent;

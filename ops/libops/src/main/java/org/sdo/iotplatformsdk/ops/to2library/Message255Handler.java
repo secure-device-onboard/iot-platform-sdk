@@ -20,41 +20,36 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.SdoErrorCodec;
-import org.sdo.iotplatformsdk.common.protocol.rest.AuthToken;
+import org.sdo.iotplatformsdk.common.protocol.types.MessageType;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoErrorCode;
+import org.sdo.iotplatformsdk.common.protocol.types.SdoProtocolException;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The REST endpoint for message 255, Error.
  */
-@RestController
 public class Message255Handler {
 
   private final SessionStorage sessionStorage;
-  private OwnerEventHandler ownerEventHandler = null;
+  private final OwnerEventHandler ownerEventHandler;
 
-  @Autowired
-  public Message255Handler(final SessionStorage sessionStorage) {
+  /**
+   * Constructor.
+   */
+  public Message255Handler(final SessionStorage sessionStorage,
+      final OwnerEventHandler ownerEventHandler) {
     this.sessionStorage = Objects.requireNonNull(sessionStorage);
+    this.ownerEventHandler = Objects.requireNonNull(ownerEventHandler);
   }
 
-  private static SdoError parseError(final String bodyText) {
+  private SdoError parseError(final String bodyText) {
 
     final String nonNullBody = Objects.requireNonNullElse(bodyText, "");
     try {
@@ -65,55 +60,48 @@ public class Message255Handler {
   }
 
   /**
-   * End-point method.
+   * Performs operations as per Type 255 for Transfer Ownership Protocol 2.
    *
-   * @param requestEntity {@link RequestEntity} instance.
-   * @return
+   * @param requestBody           String request containing the error information.
+   * @param sessionId             Identifier for which requestBody is processed.
+   * @throws SdoProtocolException {@link SdoProtocolException} when an exception is thrown.
    */
-  @PostMapping("mp/113/msg/255")
-  @SuppressWarnings("unused")
-  public Callable<ResponseEntity<?>> onPostAsync(final RequestEntity<String> requestEntity) {
-    return () -> onPost(requestEntity);
-  }
-
-  private ResponseEntity<?> onPost(final RequestEntity<String> requestEntity) {
-
-    getLogger().info(requestEntity.toString());
-
-    // Is this error for a known session? If we're getting an error
-    // for a proxy we've not heard of, deny it.
-    //
-    final To2DeviceSessionInfo to2Session;
+  public void onPost(final String requestBody, final String sessionId) throws SdoProtocolException {
     try {
-      final AuthToken authToken =
-          new AuthToken(requestEntity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
-      final UUID sessionKey = authToken.getUuid();
-      Object o = getSessionStorage().load(sessionKey);
+      if (null == requestBody) {
+        throw new IOException("invalid request");
+      }
+      getLogger().debug("Processing input " + requestBody + "\n for " + sessionId);
+
+      // Is this error for a known session? If we're getting an error
+      // for a proxy we've not heard of, deny it.
+      //
+      final To2DeviceSessionInfo to2Session;
+
+      Object o = getSessionStorage().load(sessionId);
 
       if (o instanceof To2DeviceSessionInfo) {
         to2Session = (To2DeviceSessionInfo) o;
         // sending an error invalidates the session
-        getSessionStorage().remove(sessionKey);
+        getSessionStorage().remove(sessionId);
 
       } else {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        throw new RuntimeException();
       }
-
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    final OwnershipProxy proxy;
-    try {
-      proxy = new OwnershipProxyCodec.OwnershipProxyDecoder()
+      final OwnershipProxy proxy = new OwnershipProxyCodec.OwnershipProxyDecoder()
           .decode(CharBuffer.wrap(to2Session.getMessage41Store().getOwnershipProxy()));
-      getOwnerEventHandler().ifPresent(
-          handler -> handler.call(new To2ErrorEvent(parseError(requestEntity.getBody()), proxy)));
-    } catch (IOException e) {
-      // nothing can be done if there's no ownership voucher.
-    }
+      getOwnerEventHandler()
+          .ifPresent(handler -> handler.call(new To2ErrorEvent(parseError(requestBody), proxy)));
 
-    return ResponseEntity.ok().build();
+    } catch (SdoProtocolException sp) {
+      getLogger().debug(sp.getMessage(), sp);
+      throw sp;
+    } catch (Exception e) {
+      getLogger().debug(e.getMessage(), e);
+      throw new SdoProtocolException(
+          new SdoError(SdoErrorCode.InternalError, MessageType.TO2_HELLO_DEVICE, e.getMessage()),
+          e);
+    }
   }
 
   private Logger getLogger() {
@@ -122,12 +110,6 @@ public class Message255Handler {
 
   private Optional<OwnerEventHandler> getOwnerEventHandler() {
     return Optional.ofNullable(ownerEventHandler);
-  }
-
-  @Autowired
-  @SuppressWarnings("unused")
-  public void setOwnerEventHandler(final OwnerEventHandler ownerEventHandler) {
-    this.ownerEventHandler = ownerEventHandler;
   }
 
   private SessionStorage getSessionStorage() {

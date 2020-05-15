@@ -24,20 +24,17 @@ import java.util.UUID;
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
 import org.sdo.iotplatformsdk.common.protocol.config.OwnershipProxyStorage;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class OpsProxyStorage implements OwnershipProxyStorage {
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(OpsProxyStorage.class);
 
-  private RestClient restClient;
+  private final RestClient restClient;
 
-  public OpsProxyStorage() {}
-
-  @Autowired
-  public void setRestClient(RestClient restClient) {
+  public OpsProxyStorage(RestClient restClient) {
     this.restClient = restClient;
   }
 

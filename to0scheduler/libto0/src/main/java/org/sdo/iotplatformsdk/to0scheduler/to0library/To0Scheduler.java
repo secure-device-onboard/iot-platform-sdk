@@ -16,42 +16,52 @@
 
 package org.sdo.iotplatformsdk.to0scheduler.to0library;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
-import org.sdo.iotplatformsdk.common.protocol.config.SimpleWaitSecondsBuilder;
+import org.sdo.iotplatformsdk.common.protocol.config.ObjectFactory;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> {
+public class To0Scheduler {
 
   protected static final Logger logger = LoggerFactory.getLogger(To0Scheduler.class);
 
-  private ThreadPoolTaskScheduler taskScheduler;
-  private ObjectFactory<To0ClientSession> sessionFactory;
+  private final ExecutorService taskScheduler;
+  private final ObjectFactory<To0ClientSession> sessionFactory;
   private final Queue<To0ClientSession> availableSessions = new LinkedList<To0ClientSession>();
 
-  // max number of TO0ClientSessions permitted. Default: 10.
-  @Value("${session.pool.size:10}")
-  private int sessionPoolSize;
+  // max number of TO0ClientSessions permitted.
+  private final int sessionPoolSize;
 
-  private To0SchedulerEvents eventHandler;
-  private To0ProxyStore proxyStore;
+  private final To0SchedulerEvents eventHandler;
+  private final To0ProxyStore proxyStore;
 
   /**
    * Construct a new object.
    */
-  public To0Scheduler() {}
+  public To0Scheduler(ExecutorService taskExecutor, ObjectFactory<To0ClientSession> sessionFactory,
+      To0SchedulerEvents handler, To0ProxyStore proxyStore, int to0ClientSessionPoolSize) {
+    this.taskScheduler = taskExecutor;
+    this.sessionFactory = sessionFactory;
+    this.eventHandler = handler;
+    this.proxyStore = proxyStore;
+    this.sessionPoolSize = to0ClientSessionPoolSize;
+
+    logger.debug("The specified To0 session pool size is " + getSessionPoolSize());
+    for (int i = 0; i < getSessionPoolSize(); i++) {
+      try {
+        getAvailableSessions().add(getSessionFactory().getObject());
+      } catch (Exception e) {
+        logger.debug(e.getMessage(), e);
+      }
+    }
+  }
 
   /**
    * This method notifies all threads that a To0ClientSession is available.
@@ -65,17 +75,12 @@ public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> 
     }
   }
 
-  @Autowired
-  public void setTaskScheduler(ThreadPoolTaskScheduler taskExecutor) {
-    taskScheduler = taskExecutor;
-  }
-
   /**
-   * Returns the scheduler thread pool instance.
+   * Returns the thread pool instance.
    *
-   * @return ThreadPoolTaskScheduler instance.
+   * @return ThreadPoolExecutor instance.
    */
-  protected ThreadPoolTaskScheduler getTaskScheduler() {
+  protected Executor getExecutorService() {
     return taskScheduler;
   }
 
@@ -83,23 +88,8 @@ public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> 
     return sessionFactory;
   }
 
-  @Autowired
-  public void setSessionFactory(ObjectFactory<To0ClientSession> sessionFactory) {
-    this.sessionFactory = sessionFactory;
-  }
-
-  @Autowired
-  public void setEventHandler(To0SchedulerEvents handler) {
-    this.eventHandler = handler;
-  }
-
   protected To0SchedulerEvents getEventHandler() {
     return eventHandler;
-  }
-
-  @Autowired
-  public void setProxyStore(To0ProxyStore proxyStore) {
-    this.proxyStore = proxyStore;
   }
 
   public To0ProxyStore getProxyStore() {
@@ -108,10 +98,6 @@ public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> 
 
   protected Queue<To0ClientSession> getAvailableSessions() {
     return availableSessions;
-  }
-
-  public void setSessionPoolSize(int size) {
-    this.sessionPoolSize = size;
   }
 
   protected int getSessionPoolSize() {
@@ -130,12 +116,10 @@ public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> 
           if (getAvailableSessions().isEmpty()) {
             return true;
           }
-          SimpleWaitSecondsBuilder wsBuilder = new SimpleWaitSecondsBuilder();
-          wsBuilder.setWaitSeconds(waitSeconds);
-          To0ClientSession to0ClientSession = getAvailableSessions().poll();
+          final To0ClientSession to0ClientSession = getAvailableSessions().poll();
+          to0ClientSession.setTo0WaitSeconds(waitSeconds);
           CompletableFuture
-              .supplyAsync(() -> setDeviceForTo0(deviceId, to0ClientSession, wsBuilder),
-                  getTaskScheduler())
+              .supplyAsync(() -> setDeviceForTo0(deviceId, to0ClientSession), getExecutorService())
               .thenAccept(to0Session -> {
                 notifySessionAvailable(to0Session);
               });
@@ -149,31 +133,15 @@ public class To0Scheduler implements ApplicationListener<ContextRefreshedEvent> 
     }
   }
 
-  private To0ClientSession setDeviceForTo0(String deviceId, To0ClientSession to0ClientSession,
-      SimpleWaitSecondsBuilder wsBuilder) {
+  private To0ClientSession setDeviceForTo0(String deviceId, To0ClientSession to0ClientSession) {
     OwnershipProxy proxy;
     try {
       proxy = getProxyStore().getProxy(deviceId);
       logger.info("Register OP: " + proxy.getOh().getG().toString());
-    } catch (IOException ie) {
-      logger.info("Error in fetching the proxy for " + deviceId);
+    } catch (Exception e) {
+      logger.error("Error in fetching the proxy for " + deviceId);
       return null;
     }
-    return new To0ScheduledClientSession(proxy, to0ClientSession, wsBuilder, getEventHandler())
-        .call();
-  }
-
-  /**
-   * Depending on the session pool size, set the number of available @link To0ClientSession,
-   * and schedule.
-   */
-  @Override
-  public void onApplicationEvent(ContextRefreshedEvent event) {
-    // setup the session factory
-    logger.debug("The specified To0 session pool size is " + getSessionPoolSize());
-    logger.debug("The specified thread pool size is " + getTaskScheduler().getPoolSize());
-    for (int i = 0; i < getSessionPoolSize(); i++) {
-      getAvailableSessions().add(getSessionFactory().getObject());
-    }
+    return new To0ScheduledClientSession(proxy, to0ClientSession, getEventHandler()).call();
   }
 }

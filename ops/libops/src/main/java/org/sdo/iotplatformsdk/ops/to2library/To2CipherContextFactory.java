@@ -45,6 +45,7 @@ import org.sdo.iotplatformsdk.common.protocol.security.keyexchange.EcdhKeyExchan
 import org.sdo.iotplatformsdk.common.protocol.security.keyexchange.KeyExchange;
 import org.sdo.iotplatformsdk.common.protocol.types.CipherType;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
+import org.sdo.iotplatformsdk.common.protocol.types.MessageType;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoErrorCode;

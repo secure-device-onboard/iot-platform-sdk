@@ -15,11 +15,15 @@
 package org.sdo.iotplatformsdk.to0scheduler.to0library;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.CharBuffer;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
@@ -32,9 +36,7 @@ import org.sdo.iotplatformsdk.common.protocol.codecs.To0HelloCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To0OwnerSignCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To0OwnerSignTo0dCodec.To0dEncoder;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To1SdoRedirectCodec;
-import org.sdo.iotplatformsdk.common.protocol.config.SimpleWaitSecondsBuilder;
-import org.sdo.iotplatformsdk.common.protocol.config.WaitSecondsBuilder;
-import org.sdo.iotplatformsdk.common.protocol.rest.SdoRestTemplate;
+import org.sdo.iotplatformsdk.common.protocol.rest.SdoUriComponentsBuilder;
 import org.sdo.iotplatformsdk.common.protocol.security.CryptoLevel;
 import org.sdo.iotplatformsdk.common.protocol.security.CryptoLevels;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
@@ -47,38 +49,39 @@ import org.sdo.iotplatformsdk.common.protocol.types.To0HelloAck;
 import org.sdo.iotplatformsdk.common.protocol.types.To0OwnerSign;
 import org.sdo.iotplatformsdk.common.protocol.types.To0OwnerSignTo0d;
 import org.sdo.iotplatformsdk.common.protocol.types.To1SdoRedirect;
-import org.sdo.iotplatformsdk.common.protocol.types.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 public class To0ClientSession {
 
   private static final Logger LOG = LoggerFactory.getLogger(To0ClientSession.class);
   private final SignatureServiceFactory signatureServiceFactory;
   private final URI to1dOwnerRedirectPath;
-  private ClientHttpRequestFactory requestFactory = null;
-  private WaitSecondsBuilder waitSecondsBuilder = new SimpleWaitSecondsBuilder();
+  private final HttpClient httpClient;
+  private Duration to0WaitSeconds;
 
+  /**
+   * Constructor.
+   */
   public To0ClientSession(final SignatureServiceFactory signatureServiceFactory,
-      URI to1dRedirectPath) {
+      URI to1dRedirectPath, HttpClient httpClient) {
     this.signatureServiceFactory = signatureServiceFactory;
     this.to1dOwnerRedirectPath = to1dRedirectPath;
+    this.httpClient = httpClient;
+  }
+
+  public void setTo0WaitSeconds(Duration to0WaitSeconds) {
+    this.to0WaitSeconds = to0WaitSeconds;
   }
 
   /**
    * Runs the TO2 operation.
-   * @param proxy      {@link OwnershipProxy} instance for which TO0 is run.
-   * @param uriBuilder {@link UriComponentsBuilder} instance
-   * @return           the wait seconds
+   *
+   * @param proxy {@link OwnershipProxy} instance for which TO0 is run.
+   * @param uri   {@link UriComponentsBuilder} instance
+   * @return      the wait seconds
    */
-  public Duration run(OwnershipProxy proxy, UriComponentsBuilder uriBuilder)
+  public Duration run(OwnershipProxy proxy, URI uri)
       throws IOException, ExecutionException, InterruptedException {
 
     // Which crypto level is used in this ownership voucher?
@@ -98,17 +101,22 @@ public class To0ClientSession {
     /**
      * Sends TO0Hello - message 20 to the server.
      */
-    URI uri = uriBuilder.build(Version.VERSION_1_13, To0Hello.ID);
-    RequestEntity<String> requestEntity =
-        RequestEntity.post(uri).contentType(APPLICATION_JSON).body(request);
-    LOG.info(requestEntity.toString());
+    final HttpRequest.Builder httpRequestBuilder =
+        HttpRequest.newBuilder().header("Content-Type", "application/json");
+    HttpRequest httpRequest =
+        httpRequestBuilder.uri(uri.resolve(SdoUriComponentsBuilder.path(To0Hello.ID)))
+            .POST(BodyPublishers.ofString(request)).build();
+    LOG.info("[HTTP Request]: " + httpRequest.method() + " " + httpRequest.uri());
 
-    RestTemplate template = new SdoRestTemplate(getRequestFactory());
-    ResponseEntity<String> responseEntity = template.exchange(requestEntity, String.class);
-    LOG.info(responseEntity.toString());
+    HttpResponse<String> httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
+    if (httpResponse.statusCode() != 200) {
+      throw new IOException(httpResponse.toString() + " " + httpResponse.body());
+    }
 
-    final String authToken = responseEntity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-    String response = null != responseEntity.getBody() ? responseEntity.getBody() : "";
+    String response = null != httpResponse.body() ? httpResponse.body() : "";
+    LOG.info("[HTTP Response]: " + httpResponse.toString());
+
+    final String authToken = httpResponse.headers().firstValue("Authorization").get();
 
     /**
      * Decoding the response from the server Receiving message 21 from the server.
@@ -119,8 +127,7 @@ public class To0ClientSession {
      * Composing To0d of message 22 To compose the message, retrieving the nonce (n3) from the
      * server response.
      */
-    final To0OwnerSignTo0d to0d =
-        new To0OwnerSignTo0d(proxy, getWaitSecondsBuilder().apply(proxy), helloAck.getN3());
+    final To0OwnerSignTo0d to0d = new To0OwnerSignTo0d(proxy, to0WaitSeconds, helloAck.getN3());
 
     writer = new StringWriter();
 
@@ -159,22 +166,23 @@ public class To0ClientSession {
             .encode(writer, ownerSign);
     request = writer.toString();
 
-    uri = uriBuilder.build(Version.VERSION_1_13, To0OwnerSign.ID);
-
     /**
      * Sending request to RZ server
      */
-    requestEntity = RequestEntity.post(uri).contentType(APPLICATION_JSON)
-        .header(HttpHeaders.AUTHORIZATION, authToken).body(request);
-    LOG.info(requestEntity.toString());
+    httpRequest = httpRequestBuilder.header("Authorization", authToken)
+        .uri(uri.resolve(SdoUriComponentsBuilder.path(To0OwnerSign.ID)))
+        .POST(BodyPublishers.ofString(request)).build();
+    LOG.info("[HTTP Request]: " + httpRequest.method() + " " + httpRequest.uri() + "\n" + request);
 
     /**
      * Receiving message 23 from server
      */
-    responseEntity = template.exchange(requestEntity, String.class);
-    LOG.info(responseEntity.toString());
-
-    response = null != responseEntity.getBody() ? responseEntity.getBody() : "";
+    httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
+    if (httpResponse.statusCode() != 200) {
+      throw new IOException(httpResponse.toString() + " " + httpResponse.body());
+    }
+    response = null != httpResponse.body() ? httpResponse.body() : "";
+    LOG.info("[HTTP Response]: " + httpResponse.toString());
 
     /**
      * Decoding message 23 The New Owner Client can drop the connection after this message is
@@ -182,7 +190,7 @@ public class To0ClientSession {
      * within waitSeconds seconds, it must repeat Transfer Ownership Protocol 0 and re-register its
      * GUID to address association.
      */
-    To0AcceptOwner acceptOwner =
+    final To0AcceptOwner acceptOwner =
         new To0AcceptOwnerCodec().decoder().apply(CharBuffer.wrap(response));
 
     /**
@@ -191,26 +199,5 @@ public class To0ClientSession {
      * address association.
      */
     return acceptOwner.getWs();
-  }
-
-  private ClientHttpRequestFactory getRequestFactory() {
-    if (null == requestFactory) {
-      throw new IllegalStateException("ClientHttpRequestFactory must not be null");
-    }
-    return requestFactory;
-  }
-
-  @Autowired
-  public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
-    this.requestFactory = requestFactory;
-  }
-
-  private WaitSecondsBuilder getWaitSecondsBuilder() {
-    return waitSecondsBuilder;
-  }
-
-  @Autowired
-  public void setWaitSecondsBuilder(WaitSecondsBuilder waitSecondsBuilder) {
-    this.waitSecondsBuilder = waitSecondsBuilder;
   }
 }

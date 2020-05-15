@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -17,18 +17,14 @@
 package org.sdo.iotplatformsdk.ops.to2library;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +35,7 @@ import org.sdo.iotplatformsdk.common.protocol.security.SignatureService;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
 import org.sdo.iotplatformsdk.common.protocol.types.RendezvousInfo;
+import org.sdo.iotplatformsdk.common.protocol.types.SdoProtocolException;
 import org.sdo.iotplatformsdk.common.protocol.types.SignatureBlock;
 import org.sdo.iotplatformsdk.common.rest.DeviceCryptoInfo;
 import org.sdo.iotplatformsdk.common.rest.Message41Store;
@@ -46,23 +43,15 @@ import org.sdo.iotplatformsdk.common.rest.Message45Store;
 import org.sdo.iotplatformsdk.common.rest.Message47Store;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoModule;
-import org.sdo.iotplatformsdk.ops.to2library.KeyExchangeDecoder;
-import org.sdo.iotplatformsdk.ops.to2library.Message46Handler;
-import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
-import org.sdo.iotplatformsdk.ops.to2library.SetupDeviceService;
 import org.sdo.iotplatformsdk.ops.to2library.SetupDeviceService.Setup;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 
 class Message46HandlerTest {
 
   AsymKexCodec asymKexCodec;
   ByteBuffer sg;
   byte[] uuid;
-  Callable<ResponseEntity<?>> badresponseEntity;
-  Callable<ResponseEntity<?>> responseEntity;
+  String badresponseEntity;
+  String responseEntity;
   DeviceCryptoInfo deviceCryptoInfo;
   Future<SignatureBlock> futureSignatureBlock;
   KeyExchangeDecoder keyExchangeDecoder;
@@ -71,8 +60,6 @@ class Message46HandlerTest {
   Message45Store message45Store;
   Message47Store message47Store;
   RendezvousInfo r3;
-  RequestEntity<String> badrequestEntity;
-  RequestEntity<String> requestEntity;
   SignatureBlock signatureBlock;
   SignatureService signatureService;
   Setup setup;
@@ -114,8 +101,6 @@ class Message46HandlerTest {
     signatureServiceFactory = Mockito.mock(SignatureServiceFactory.class);
     to2DeviceSessionInfo = new To2DeviceSessionInfo();
     uuid = new byte[16];
-    message46Handler = new Message46Handler(signatureServiceFactory);
-    message46Handler.setKeyExchangeDecoder(keyExchangeDecoder);
 
     message41Store = new Message41Store("\"UOpomJjQ2KeXQJO44aGLYg==\"", "\"ECDH\"",
         "{\"sz\":1,\"oh\":{\"pv\":113,\"pe\":3,\"r\":[2,[4,{\"dn\":\"localhost\",\"only\":\"owner\""
@@ -171,26 +156,9 @@ class Message46HandlerTest {
         + "6kFqETDgZozF45AUnShDPI=\"],\"hmac\":[32,108,\"VqgXk50h5QWfkPM93PPRHi7MoZCY8okhnr"
         + "LE+xmpcA0=\"]}";
 
-    badrequestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.EXPIRES, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "728")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message46);
+    message46Handler = new Message46Handler(signatureServiceFactory, sessionStorage,
+        setupDeviceservice, secureRandom, keyExchangeDecoder, serviceInfoModules);
 
-    requestEntity =
-        RequestEntity.post(URI.create("http://localhost")).header("accept", "text/plain, */*")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + DatatypeConverter.printHexBinary(uuid))
-            .header("user-agent", "Java/11.0.3").header("host", "localhost:8042")
-            .header("connection", "keep-alive").header("content-length", "728")
-            .contentType(MediaType.APPLICATION_JSON_UTF8).body(message46);
-
-    badresponseEntity = message46Handler.onPostAsync(badrequestEntity);
-    responseEntity = message46Handler.onPostAsync(requestEntity);
-
-    message46Handler.setServiceInfoModules(serviceInfoModules);
-    message46Handler.setSessionStorage(sessionStorage);
-    message46Handler.setSetupDeviceService(setupDeviceservice);
   }
 
   @Test
@@ -214,20 +182,20 @@ class Message46HandlerTest {
     Mockito.when(futureSignatureBlock.get()).thenReturn(signatureBlock);
 
     try {
-      responseEntity.call();
+      message46Handler.onPost(message46, Mockito.anyString());
     } catch (Exception e) {
-      e.printStackTrace();
+      // nothing to do.
     }
+
   }
 
   @Test
   void test_Message46_BadRequest() throws Exception {
 
     Mockito.when(sessionStorage.load(Mockito.any(UUID.class))).thenReturn(to2DeviceSessionInfo);
-    badresponseEntity.call();
-
-    Mockito.when(sessionStorage.load(Mockito.any(UUID.class))).thenReturn(to2DeviceSessionInfo);
-    responseEntity.call();
+    Assertions.assertThrows(SdoProtocolException.class, () -> {
+      message46Handler.onPost(message46, Mockito.anyString());
+    });
 
     message45Store = new Message45Store("\"GYaV0lGJpZxbQ0DMlYOqKA==\"", 2,
         "[86,\"ACAdArDxkfqqb5lkS9O1A1RsABXNgMRMxPXB9C0dzOP3UQAgFA8l+H+MPGNnVQ5ZSOV94FckW4VX"
@@ -247,8 +215,8 @@ class Message46HandlerTest {
         .thenReturn(signatureService);
     Mockito.when(signatureService.sign(Mockito.anyString())).thenReturn(futureSignatureBlock);
     Mockito.when(futureSignatureBlock.get()).thenReturn(signatureBlock);
-    Assertions.assertThrows(IOException.class, () -> {
-      responseEntity.call();
+    Assertions.assertThrows(SdoProtocolException.class, () -> {
+      message46Handler.onPost(message46, Mockito.anyString());
     });
   }
 }

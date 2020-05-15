@@ -30,9 +30,9 @@ import org.sdo.iotplatformsdk.common.protocol.security.SignatureService;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
 import org.sdo.iotplatformsdk.common.protocol.types.SignatureBlock;
 import org.sdo.iotplatformsdk.common.rest.SignatureResponse;
+import org.sdo.iotplatformsdk.to0scheduler.rest.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Provides implementation of {@link SignatureServiceFactory} to get the {@link SignatureBlock}
@@ -44,14 +44,11 @@ public class To0SignatureServiceFactoryImpl implements SignatureServiceFactory {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(To0SignatureServiceFactoryImpl.class);
 
-  private RestClient restClient;
+  private final RestClient restClient;
 
-  @Autowired
-  public void setRestClient(RestClient restClient) {
+  public To0SignatureServiceFactoryImpl(RestClient restClient) {
     this.restClient = restClient;
   }
-
-  public To0SignatureServiceFactoryImpl() {}
 
   /**
    * Send a request to retrieve the SingatureResponse object. Create the public key from the BASE-64

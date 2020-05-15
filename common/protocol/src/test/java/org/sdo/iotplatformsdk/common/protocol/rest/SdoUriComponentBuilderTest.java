@@ -16,27 +16,22 @@
 
 package org.sdo.iotplatformsdk.common.protocol.rest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.net.URI;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.sdo.iotplatformsdk.common.protocol.rest.SdoUriComponentsBuilder;
+import org.sdo.iotplatformsdk.common.protocol.types.MessageType;
 
 class SdoUriComponentBuilderTest {
 
   SdoUriComponentsBuilder sdoUriComponentsBuilder;
   URI uri;
 
-  @BeforeEach
-  void beforeEach() {
-
-    uri = URI.create("www.intel.com");
-  }
-
   @Test
   void test_UriComponentBuilder() throws IOException {
-
-    sdoUriComponentsBuilder = new SdoUriComponentsBuilder(uri);
+    String path = SdoUriComponentsBuilder.path(MessageType.TO2_DONE.intValue());
+    assertEquals("/mp/113/msg/50", path);
   }
 }

@@ -31,9 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.codecs.OwnershipProxyCodec;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
-import org.sdo.iotplatformsdk.ops.opsimpl.OpsProxyStorage;
-import org.sdo.iotplatformsdk.ops.opsimpl.OpsRestUri;
-import org.sdo.iotplatformsdk.ops.opsimpl.RestClient;
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
 
 @RunWith(JUnit4.class)
 public class OpsProxyStorageTest extends TestCase {
@@ -75,9 +73,6 @@ public class OpsProxyStorageTest extends TestCase {
   @Mock
   RestClient restClient;
 
-  @Mock
-  OpsRestUri opsRestUri;
-
   @Override
   @Before
   public void setUp() {
@@ -87,8 +82,7 @@ public class OpsProxyStorageTest extends TestCase {
   @Test
   public void testLoad() throws IOException {
 
-    proxyStorage = new OpsProxyStorage();
-    proxyStorage.setRestClient(restClient);
+    proxyStorage = new OpsProxyStorage(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
     Mockito.when(restClient.getDeviceVoucher(uuid)).thenReturn(expectedVoucher);
     OwnershipProxy actualProxy = proxyStorage.load(uuid);
@@ -106,8 +100,7 @@ public class OpsProxyStorageTest extends TestCase {
   @Test
   public void testLoadNoProxy() throws IOException {
 
-    proxyStorage = new OpsProxyStorage();
-    proxyStorage.setRestClient(restClient);
+    proxyStorage = new OpsProxyStorage(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
 
     Mockito.when(restClient.getDeviceVoucher(uuid)).thenReturn(null);
@@ -119,8 +112,7 @@ public class OpsProxyStorageTest extends TestCase {
   @Test(expected = IOException.class)
   public void testLoadBadProxyField() throws IOException {
 
-    proxyStorage = new OpsProxyStorage();
-    proxyStorage.setRestClient(restClient);
+    proxyStorage = new OpsProxyStorage(restClient);
     UUID uuid = UUID.fromString("89abdd4e-44cc-4fbb-8765-d8d2a1584df3");
     expectedVoucher = expectedVoucher.replaceFirst("oh", "o");
 

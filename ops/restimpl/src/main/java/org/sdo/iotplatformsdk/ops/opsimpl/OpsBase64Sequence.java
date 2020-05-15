@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
 
+import org.sdo.iotplatformsdk.ops.rest.RestClient;
+
 /**
  * Represents an BASE-64 encoding version of OpsCharSequence.
  */
