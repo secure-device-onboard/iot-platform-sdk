@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Creates and returns a custom {@link SSLContext} by loading a separate keystore and truststore.
+ * Used specifically for outgoing connections to Owner Companion Service.
  */
 public class To0CustomSslContextFactory extends SslContextFactory {
 
@@ -77,7 +78,7 @@ public class To0CustomSslContextFactory extends SslContextFactory {
       final TrustManager[] tm = tmf.getTrustManagers();
 
       final SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(km, tm, new SecureRandom());
+      sslContext.init(km, tm, getSecureRandom());
       return sslContext;
     } catch (Exception e) {
       LOGGER.error("Error occurred while creating ssl context. ", e.getMessage());

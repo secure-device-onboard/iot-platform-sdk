@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import javax.net.ssl.SSLContext;
+
 import org.sdo.iotplatformsdk.common.protocol.config.ObjectFactory;
 import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
 import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
@@ -34,6 +36,7 @@ import org.sdo.iotplatformsdk.to0scheduler.rest.To0Controller;
 import org.sdo.iotplatformsdk.to0scheduler.rest.To0ControllerAdvice;
 import org.sdo.iotplatformsdk.to0scheduler.rest.To0CustomSslContextFactory;
 import org.sdo.iotplatformsdk.to0scheduler.rest.To0HealthController;
+import org.sdo.iotplatformsdk.to0scheduler.rest.To0NoopSslContextFactory;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0ClientSession;
 import org.sdo.iotplatformsdk.to0scheduler.to0library.To0Scheduler;
 import org.sdo.iotplatformsdk.to0scheduler.to0service.To0PropertiesLoader;
@@ -72,6 +75,10 @@ public class To0ServiceConfiguration {
           : Duration.ofHours(1);
   private final String redirectInfo =
       To0PropertiesLoader.getProperty("org.sdo.to0.ownersign.to1d.bo");
+  private final boolean to0tlsTestMode =
+      null != To0PropertiesLoader.getProperty("org.sdo.to0.tls.test-mode")
+          ? Boolean.valueOf(To0PropertiesLoader.getProperty("org.sdo.to0.tls.test-mode"))
+          : false;
   private final Duration httpClientTimeout = Duration.ofSeconds(30);
 
   /**
@@ -119,10 +126,15 @@ public class To0ServiceConfiguration {
 
       @Override
       public To0ClientSession getObject() {
+        final SSLContext sslContext;
+        if (to0tlsTestMode) {
+          sslContext = to0NoopSslContextFactory().getObject();
+        } else {
+          sslContext = sslContextFactory().getObject();
+        }
         return new To0ClientSession(signatureServiceFactory(),
-            Paths.get(".").toUri().resolve(redirectInfo).normalize(),
-            HttpClient.newBuilder().sslContext(sslContextFactory().getObject())
-                .connectTimeout(httpClientTimeout).build());
+            Paths.get(".").toUri().resolve(redirectInfo).normalize(), HttpClient.newBuilder()
+                .sslContext(sslContext).connectTimeout(httpClientTimeout).build());
       }
     };
   }
@@ -172,6 +184,16 @@ public class To0ServiceConfiguration {
   @Bean
   protected To0CustomSslContextFactory to0CustomSslContextFactory() {
     return new To0CustomSslContextFactory(secureRandomFactory().getObject());
+  }
+
+  /**
+   * Creates and returns a singleton instance of {@link To0NoopSslContextFactory}. Calls to
+   * this method returns the same instance, always. Used for outgoing connections to Rendezvous
+   * when to0tlsTestMode is enabled.
+   */
+  @Bean
+  protected To0NoopSslContextFactory to0NoopSslContextFactory() {
+    return new To0NoopSslContextFactory(secureRandomFactory().getObject());
   }
 
   /**

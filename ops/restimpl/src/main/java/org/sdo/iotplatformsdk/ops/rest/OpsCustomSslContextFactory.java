@@ -77,7 +77,7 @@ public class OpsCustomSslContextFactory extends SslContextFactory {
       final TrustManager[] tm = tmf.getTrustManagers();
 
       final SSLContext sslContext = SSLContext.getInstance("TLS");
-      sslContext.init(km, tm, new SecureRandom());
+      sslContext.init(km, tm, getSecureRandom());
       return sslContext;
     } catch (Exception e) {
       LOGGER.error("Error occurred while creating ssl context. ", e.getMessage());
