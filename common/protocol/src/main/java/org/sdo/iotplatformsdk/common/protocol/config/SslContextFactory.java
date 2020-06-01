@@ -16,16 +16,10 @@
 
 package org.sdo.iotplatformsdk.common.protocol.config;
 
-import java.net.Socket;
-import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509ExtendedTrustManager;
 
 import org.slf4j.LoggerFactory;
 
@@ -45,42 +39,12 @@ public class SslContextFactory implements ObjectFactory<SSLContext> {
   public SSLContext getObject() {
     if (null == sslContext) {
       try {
-        initializeObject();
-      } catch (KeyManagementException | NoSuchAlgorithmException e) {
-        LoggerFactory.getLogger(getClass()).debug("Unable to create SSLContext.");
+        sslContext = SSLContext.getDefault();
+      } catch (NoSuchAlgorithmException e) {
+        LoggerFactory.getLogger(getClass()).debug("Unable to create default SSLContext.");
       }
     }
     return sslContext;
-  }
-
-  private void initializeObject() throws NoSuchAlgorithmException, KeyManagementException {
-    TrustManager[] trustManagers = new TrustManager[] {new X509ExtendedTrustManager() {
-      @Override
-      public void checkClientTrusted(X509Certificate[] chain, String authType, Socket s) {}
-
-      @Override
-      public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine e) {}
-
-      @Override
-      public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {}
-
-      @Override
-      public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {}
-
-      @Override
-      public void checkServerTrusted(X509Certificate[] chain, String authType, Socket s) {}
-
-      @Override
-      public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine e) {}
-
-      @Override
-      public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
-      }
-    } };
-    sslContext = SSLContext.getInstance("TLS");
-    sslContext.init(null, trustManagers, getSecureRandom());
-    LoggerFactory.getLogger(getClass()).debug("UNSAFE: no-op TrustManager installed");
   }
 
   public SecureRandom getSecureRandom() {
