@@ -118,7 +118,11 @@ public class FsOcsContractImpl implements OcsRestContract {
   private final String valuesDir = FsPropertiesLoader.getProperty("fs.values.dir");
   private final boolean to2ReuseEnabled =
       FsPropertiesLoader.getProperty("to2.credential-reuse.enabled") != null
-          ? Boolean.getBoolean(FsPropertiesLoader.getProperty("to2.credential-reuse.enabled"))
+          ? Boolean.valueOf(FsPropertiesLoader.getProperty("to2.credential-reuse.enabled"))
+          : false;
+  private final boolean to2ResaleEnabled =
+      FsPropertiesLoader.getProperty("to2.owner-resale.enabled") != null
+          ? Boolean.valueOf(FsPropertiesLoader.getProperty("to2.owner-resale.enabled"))
           : true;
   // interval at which to0 scheduler will run repeatedly. Default: 60 seconds.
   private final int toSchedulerInterval =
@@ -956,5 +960,13 @@ public class FsOcsContractImpl implements OcsRestContract {
   @Override
   public void deleteDevice(String deviceId) throws Exception {
     getDataManager().removeObject(devicesDir + File.separator + deviceId);
+  }
+
+  /*
+   * Ignores device identifier, and returns the universal to2ResaleEnabled flag.
+   */
+  @Override
+  public boolean isOwnerResaleSupported(String deviceId) throws Exception {
+    return to2ResaleEnabled;
   }
 }
