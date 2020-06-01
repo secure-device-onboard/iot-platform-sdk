@@ -227,4 +227,13 @@ public interface OcsRestContract {
    */
   public void deleteDevice(String deviceId) throws Exception;
 
+  /**
+   * Return boolean value representing whether the Owner supports the Resale
+   * protocol as per the specification, for the given device identifier.
+   *
+   * @param deviceId the device identifier.
+   * @return boolean value 'true' or 'false'
+   * @throws Exception Exception that is thrown in case of any operational error.
+   */
+  public boolean isOwnerResaleSupported(String deviceId) throws Exception;
 }

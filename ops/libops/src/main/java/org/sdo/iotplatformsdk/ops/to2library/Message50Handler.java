@@ -60,6 +60,7 @@ public class Message50Handler {
   private final OwnershipProxyStorage ownershipProxyStorage;
   private final SecureRandom secureRandom;
   private final KeyExchangeDecoder keyExchangeDecoder;
+  private final OwnerResaleSupport ownerResaleSupport;
   private static final byte[] hmacValueReuse = new byte[] {(byte) 0x3d};
 
   /**
@@ -67,12 +68,13 @@ public class Message50Handler {
    */
   public Message50Handler(OwnerEventHandler ownerEventHandler, SessionStorage sessionStorage,
       OwnershipProxyStorage ownershipProxyStorage, SecureRandom secureRandom,
-      KeyExchangeDecoder keyExchangeDecoder) {
+      KeyExchangeDecoder keyExchangeDecoder, OwnerResaleSupport resaleSupport) {
     this.ownerEventHandler = ownerEventHandler;
     this.sessionStorage = sessionStorage;
     this.ownershipProxyStorage = ownershipProxyStorage;
     this.secureRandom = secureRandom;
     this.keyExchangeDecoder = keyExchangeDecoder;
+    this.ownerResaleSupport = resaleSupport;
   }
 
   /**
@@ -165,8 +167,9 @@ public class Message50Handler {
       }
       if (isDeviceReuseEnabled(done)) {
         // credential reuse protocol scenario. No change in ownership voucher.
-      } else if (!isDeviceResaleEnabled(done)) {
-        // if the device does not support resale, discard the received hmac.
+      } else if (!isOwnerResaleSupported(oldProxy.getOh().getG().toString())
+          || !isDeviceResaleEnabled(done)) {
+        // if either the owner or the device does not support resale, discard the received hmac.
         getOwnershipProxyStorage().store(newProxy);
       } else {
         // update the ownership voucher with the new hmac.
@@ -198,6 +201,10 @@ public class Message50Handler {
 
   private boolean isDeviceResaleEnabled(final To2Done done) {
     return done.getHmac().getHash().remaining() != ByteBuffer.allocate(0).remaining();
+  }
+
+  private boolean isOwnerResaleSupported(final String deviceId) {
+    return ownerResaleSupport.ownerResaleSupported(deviceId);
   }
 
   private Logger getLogger() {

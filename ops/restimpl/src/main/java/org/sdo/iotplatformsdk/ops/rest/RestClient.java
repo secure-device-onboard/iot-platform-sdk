@@ -504,4 +504,33 @@ public class RestClient {
       logger.debug(e.getMessage(), e);
     }
   }
+
+  /**
+   * Send a GET request to check whether the 'Resale' protocol for the specified device identifier,
+   * is supported or not. If an exception occurs, this method returns true.
+   *
+   * @param deviceId the device identifier.
+   * @return boolean value.
+   */
+  public boolean getOwnerResaleFlag(final String deviceId) {
+    try {
+      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      interceptors.add(
+          new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
+
+      final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
+      final String path = OpsPropertiesLoader.getProperty("rest.api.owner.resale.support.path");
+      final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
+
+      final RestTemplate restTemplate = getRestTemplate();
+      restTemplate.setInterceptors(interceptors);
+      final String url = builder.buildAndExpand(deviceId.toString()).toString();
+      return restTemplate.getForObject(url, Boolean.class);
+    } catch (Exception e) {
+      logger.error(
+          "Error occurred while fetching resale flag for " + deviceId + ". " + e.getMessage());
+      logger.debug(e.getMessage(), e);
+      return true;
+    }
+  }
 }

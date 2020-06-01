@@ -568,4 +568,26 @@ public final class OcsRestController {
       }
     });
   }
+
+  /**
+   * Returns the boolean value representing whether the Resale protocol is supported for the
+   * specified device.
+   *
+   * @param deviceId the device identifier.
+   * @return boolean value 'true' or 'false'
+   */
+  @GetMapping(path = "/devices/{deviceId}/resale", produces = MediaType.APPLICATION_JSON_VALUE)
+  public Mono<ResponseEntity<Boolean>>
+      getResaleFlag(@PathVariable(value = "deviceId", required = true) final String deviceId) {
+    return Mono.defer(() -> {
+      try {
+        final boolean response = ocsRestContractImpl.isOwnerResaleSupported(deviceId);
+        return Mono.just(new ResponseEntity<Boolean>(Boolean.valueOf(response), HttpStatus.OK));
+      } catch (Exception e) {
+        LOGGER.error(e.getMessage());
+        LOGGER.debug(e.getMessage(), e);
+        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+      }
+    });
+  }
 }

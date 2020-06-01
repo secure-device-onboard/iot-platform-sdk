@@ -31,6 +31,7 @@ import org.sdo.iotplatformsdk.ops.opsimpl.OpsAsymKexCodec;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsOwnerEventHandlerFactory;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsPropertiesLoader;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsProxyStorage;
+import org.sdo.iotplatformsdk.ops.opsimpl.OpsResaleSupport;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsServiceInfoModule;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsSessionStorageFactory;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsSetupDeviceServiceInfo;
@@ -50,6 +51,7 @@ import org.sdo.iotplatformsdk.ops.to2library.Message46Handler;
 import org.sdo.iotplatformsdk.ops.to2library.Message48Handler;
 import org.sdo.iotplatformsdk.ops.to2library.Message50Handler;
 import org.sdo.iotplatformsdk.ops.to2library.OwnerEventHandler;
+import org.sdo.iotplatformsdk.ops.to2library.OwnerResaleSupport;
 import org.sdo.iotplatformsdk.ops.to2library.SessionStorage;
 import org.sdo.iotplatformsdk.ops.to2library.SetupDeviceService;
 import org.slf4j.Logger;
@@ -254,6 +256,15 @@ public class OpsConfiguration implements WebMvcConfigurer {
   }
 
   /**
+   * Creates and returns a singleton instance of {@link OpsResaleSupport}.
+   * Calls to this method returns the same instance, always.
+   */
+  @Bean
+  protected OwnerResaleSupport ownerResaleSupport() {
+    return new OpsResaleSupport(restClient());
+  }
+
+  /**
    * Creates and returns a singleton instance of {@link Message40Handler}.
    * Calls to this method returns the same instance, always.
    */
@@ -318,7 +329,7 @@ public class OpsConfiguration implements WebMvcConfigurer {
   protected Message50Handler message50Handler() throws Exception {
     return new Message50Handler(ownerEventHandlerFactory().getObject(),
         sessionStorageFactory().getObject(), ownershipProxyStorage(),
-        secureRandomFactory().getObject(), keyExchangeDecoder());
+        secureRandomFactory().getObject(), keyExchangeDecoder(), ownerResaleSupport());
   }
 
   /**
