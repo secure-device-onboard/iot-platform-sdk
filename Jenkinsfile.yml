@@ -10,5 +10,7 @@ node('ubuntu18.04-OnDemand'){
   // Stage to build the project
   stage('build'){
     sh 'mvn clean package'
+    print "Archive the artifacts"
+    archiveArtifacts artifacts: 'demo/**/*', fingerprint: true, allowEmptyArchive: false
   }
 }
