@@ -19,9 +19,7 @@ package org.sdo.iotplatformsdk.ops.rest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.net.ssl.SSLContext;
-
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -50,7 +48,6 @@ public class RestClient {
 
   private final Logger logger = LoggerFactory.getLogger(RestClient.class);
   private final SSLContext sslContext;
-  private final RestTemplate restTemplate;
   private HttpComponentsClientHttpRequestFactory requestFactory;
 
   /**
@@ -58,11 +55,6 @@ public class RestClient {
    */
   public RestClient(SSLContext sslContext) {
     this.sslContext = sslContext;
-    this.restTemplate = new RestTemplate(sslContext());
-  }
-
-  private RestTemplate getRestTemplate() {
-    return restTemplate;
   }
 
   /**
@@ -86,11 +78,6 @@ public class RestClient {
     return requestFactory;
   }
 
-  protected List<ClientHttpRequestInterceptor> getInspectors() {
-    List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-    return interceptors;
-  }
-
   /**
    * Send a GET request to retrieve the owner voucher for the specified device identifier.
    *
@@ -99,7 +86,7 @@ public class RestClient {
    */
   public String getDeviceVoucher(final UUID deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -107,7 +94,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.voucher.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String url = builder.buildAndExpand(deviceId.toString()).toString();
       return restTemplate.getForObject(url, String.class);
@@ -124,7 +111,7 @@ public class RestClient {
    */
   public void putDeviceVoucher(final String ownerVoucher) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
           MediaType.APPLICATION_JSON_VALUE));
 
@@ -132,7 +119,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.voucher.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String url = builder.buildAndExpand("").toString();
       restTemplate.postForObject(url, ownerVoucher, String.class);
@@ -151,7 +138,7 @@ public class RestClient {
    */
   public void postDeviceState(final String deviceId, final DeviceState state) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
           MediaType.APPLICATION_JSON_VALUE));
 
@@ -159,7 +146,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.device.state.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       restTemplate.postForObject(builder.buildAndExpand(deviceId).toString(), state,
@@ -180,7 +167,7 @@ public class RestClient {
    */
   public SviMessage[] getMessage(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -188,7 +175,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.serviceinfo.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       final SviMessage[] response = restTemplate
@@ -211,7 +198,7 @@ public class RestClient {
    */
   public void postMessage(final String deviceId, final List<ModuleMessage> messages) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
           MediaType.APPLICATION_JSON_VALUE));
 
@@ -219,7 +206,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.serviceinfo.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       restTemplate.postForObject(builder.buildAndExpand(deviceId).toString(), messages,
@@ -240,15 +227,15 @@ public class RestClient {
    */
   public ModuleMessage[] getPsi(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
-      interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
-          MediaType.APPLICATION_JSON_VALUE));
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+      interceptors.add(
+          new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
       final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
       final String path = OpsPropertiesLoader.getProperty("rest.api.psi.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       final ModuleMessage[] response = restTemplate
@@ -279,10 +266,10 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.serviceinfo.value.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path)
           .queryParam("start", Integer.toString(start)).queryParam("end", Integer.toString(end));
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT,
           MediaType.APPLICATION_OCTET_STREAM_VALUE));
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String[] pathParameters = {deviceId.toString(), valueId};
       final String restUrl = builder.buildAndExpand((Object[]) pathParameters).toString();
@@ -307,17 +294,17 @@ public class RestClient {
   public SignatureResponse signatureOperation(final UUID uuid, final String bo) {
     try {
 
-      List<ClientHttpRequestInterceptor> interceptors = getInspectors();
-      interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
-          MediaType.APPLICATION_JSON_VALUE));
-      RestTemplate restTemplate = getRestTemplate();
+      List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+      interceptors.add(
+          new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
-      String path = OpsPropertiesLoader.getProperty("rest.api.signature.path");
-      UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
+      final String path = OpsPropertiesLoader.getProperty("rest.api.signature.path");
+      final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      SignatureResponse response = restTemplate
+      final SignatureResponse response = restTemplate
           .postForObject(builder.buildAndExpand(uuid).toString(), bo, SignatureResponse.class);
       return response;
 
@@ -340,15 +327,17 @@ public class RestClient {
   public byte[] cipherOperations(final byte[] xb, final String cipherOp, final UUID uuid) {
     try {
 
-      List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
-          MediaType.APPLICATION_JSON_VALUE));
-      RestTemplate restTemplate = getRestTemplate();
+          MediaType.APPLICATION_OCTET_STREAM_VALUE));
+      interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT,
+          MediaType.APPLICATION_OCTET_STREAM_VALUE));
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
-      String path = OpsPropertiesLoader.getProperty("rest.api.ciphers.path");
-      UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path)
+      final String path = OpsPropertiesLoader.getProperty("rest.api.ciphers.path");
+      final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path)
           .queryParam("operation", cipherOp);
       final String restUrl = builder.buildAndExpand(uuid.toString()).toString();
       byte[] response = restTemplate.postForObject(restUrl, xb, byte[].class);
@@ -371,7 +360,7 @@ public class RestClient {
    */
   public SetupInfoResponse getSetupInfo(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -379,7 +368,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.setupinfo.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       final SetupInfoResponse response = restTemplate
@@ -403,15 +392,15 @@ public class RestClient {
    */
   public void postError(final String deviceId, final DeviceState state) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
           MediaType.APPLICATION_JSON_VALUE));
 
       final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
       final String path = OpsPropertiesLoader.getProperty("rest.api.error.path");
-      UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
+      final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       restTemplate.postForObject(builder.buildAndExpand(deviceId).toString(), state,
@@ -432,15 +421,15 @@ public class RestClient {
    */
   public void postSessionState(final String deviceId, final To2DeviceSessionInfo session) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new RestHeaderRequestInterceptor(HttpHeaders.CONTENT_TYPE,
           MediaType.APPLICATION_JSON_VALUE));
 
       final String apiServer = OpsPropertiesLoader.getProperty("rest.api.server");
       final String path = OpsPropertiesLoader.getProperty("rest.api.session.path");
-      UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
+      final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
 
       restTemplate.postForObject(builder.buildAndExpand(deviceId).toString(), session,
@@ -459,7 +448,7 @@ public class RestClient {
    */
   public To2DeviceSessionInfo getSessionState(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -467,7 +456,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.session.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String url = builder.buildAndExpand(deviceId.toString()).toString();
       return restTemplate.getForObject(url, To2DeviceSessionInfo.class);
@@ -486,7 +475,7 @@ public class RestClient {
    */
   public void deleteSessionState(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -494,7 +483,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.session.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String url = builder.buildAndExpand(deviceId.toString()).toString();
       restTemplate.delete(url);
@@ -514,7 +503,7 @@ public class RestClient {
    */
   public boolean getOwnerResaleFlag(final String deviceId) {
     try {
-      final List<ClientHttpRequestInterceptor> interceptors = getInspectors();
+      final List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(
           new RestHeaderRequestInterceptor(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE));
 
@@ -522,7 +511,7 @@ public class RestClient {
       final String path = OpsPropertiesLoader.getProperty("rest.api.owner.resale.support.path");
       final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(apiServer).path(path);
 
-      final RestTemplate restTemplate = getRestTemplate();
+      final RestTemplate restTemplate = new RestTemplate(sslContext());
       restTemplate.setInterceptors(interceptors);
       final String url = builder.buildAndExpand(deviceId.toString()).toString();
       return restTemplate.getForObject(url, Boolean.class);

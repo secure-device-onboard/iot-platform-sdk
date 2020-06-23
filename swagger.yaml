@@ -189,7 +189,7 @@ paths:
       summary: Updates a service info value for a device
       operationId: putSviValue
       consumes:
-      - application/json
+      - application/octet-stream
       produces:
       - application/json
       parameters:
@@ -395,7 +395,7 @@ paths:
       summary: Perform the cipher operation on input array of bytes and return the resulting array of bytes
       operationId: postCiphers
       consumes:
-      - application/json
+      - application/octet-stream
       produces:
       - application/octet-stream
       parameters:
