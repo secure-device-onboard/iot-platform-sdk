@@ -66,8 +66,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return owner voucher of the device.
    */
-  @GetMapping(path = "/devices/{deviceId}/voucher",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/voucher", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<String>>
       getDeviceVoucher(@PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -92,7 +91,7 @@ public final class OcsRestController {
    * @param voucher  owner voucher json contents.
    * @return
    */
-  @PostMapping(path = "/devices/voucher", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/devices/voucher", consumes = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> putDeviceVoucher(@RequestBody(required = true) final String voucher) {
 
     return Mono.defer(() -> {
@@ -115,7 +114,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return the state information of the device.
    */
-  @GetMapping(path = "/devices/{deviceId}/state", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/state", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<DeviceState>>
       getDeviceState(@PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -140,7 +139,7 @@ public final class OcsRestController {
    * @param stateInfo the state information of the device.
    * @return
    */
-  @PostMapping(path = "/devices/{deviceId}/state", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/devices/{deviceId}/state", consumes = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> postState(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = true) final DeviceState stateInfo) {
@@ -167,7 +166,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier
    * @return an array of serviceinfo messages.
    */
-  @GetMapping(path = "/devices/{deviceId}/msgs", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/msgs", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<SviMessage[]>>
       getServiceInfo(@PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -192,7 +191,7 @@ public final class OcsRestController {
    * @param sviMessages an array of serviceinfo messages.
    * @return
    */
-  @PutMapping(path = "/devices/{deviceId}/msgs", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PutMapping(path = "/devices/{deviceId}/msgs", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> putSvi(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = true) final SviMessage[] sviMessages) {
@@ -217,8 +216,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return
    */
-  @DeleteMapping(path = "/devices/{deviceId}/msgs",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @DeleteMapping(path = "/devices/{deviceId}/msgs", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity>
       deleteSvi(@PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -244,7 +242,7 @@ public final class OcsRestController {
    * @param message  device serviceinfo message.
    * @return
    */
-  @PostMapping(path = "/devices/{deviceId}/msgs", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/devices/{deviceId}/msgs", consumes = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> postMessage(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = true) final ModuleMessage[] message) {
@@ -304,7 +302,7 @@ public final class OcsRestController {
    * @return
    */
   @PutMapping(path = "/devices/{deviceId}/values/{valueId}",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+      consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public Mono<ResponseEntity> putValue(
       @PathVariable(value = "deviceId", required = true) String deviceId,
       @PathVariable(value = "valueId", required = true) String valueId,
@@ -332,7 +330,7 @@ public final class OcsRestController {
    * @return
    */
   @DeleteMapping(path = "/devices/{deviceId}/values/{valueId}",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> deleteValue(
       @PathVariable(value = "deviceId", required = true) String deviceId,
       @PathVariable(value = "valueId", required = true) String valueId) {
@@ -358,7 +356,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return pre-serviceinfo for the device.
    */
-  @GetMapping(path = "/devices/{deviceId}/psi", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/psi", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<ModuleMessage[]>>
       getPsi(@PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -383,8 +381,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return an object containing the rendezvous information and guid.
    */
-  @GetMapping(path = "/devices/{deviceId}/setupinfo",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/setupinfo", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<SetupInfoResponse>>
       getSetupInfo(@PathVariable(value = "deviceId", required = true) final String deviceId) {
     return Mono.defer(() -> {
@@ -407,8 +404,7 @@ public final class OcsRestController {
    * @param errorState the error information.
    * @return
    */
-  @PostMapping(path = "/devices/{deviceId}/errors",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/devices/{deviceId}/errors", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> postErrors(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = false) final DeviceState errorState) {
@@ -432,7 +428,7 @@ public final class OcsRestController {
    * @param input    the data to be signed.
    * @return the signature, public key and its algorithm.
    */
-  @PostMapping(path = "/signatures/{deviceId}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/signatures/{deviceId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<SignatureResponse>> postSignature(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = false) final String input) {
@@ -456,7 +452,8 @@ public final class OcsRestController {
    * @param input the data to be deciphered.
    * @return byte array.
    */
-  @PostMapping(path = "/ciphers/{deviceId}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(path = "/ciphers/{deviceId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+      consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public Mono<ResponseEntity<byte[]>> asymCipherOperations(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestParam(value = "operation", required = true) String operation,
@@ -479,8 +476,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return the session information.
    */
-  @GetMapping(path = "/devices/{deviceId}/sessioninfo",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(path = "/devices/{deviceId}/sessioninfo", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity<To2DeviceSessionInfo>> getDeviceSessionInfo(
       @PathVariable(value = "deviceId", required = true) final String deviceId) {
 
@@ -507,7 +503,7 @@ public final class OcsRestController {
    * @return
    */
   @PostMapping(path = "/devices/{deviceId}/sessioninfo",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> postDeviceSessionInfo(
       @PathVariable(value = "deviceId", required = true) final String deviceId,
       @RequestBody(required = false) final To2DeviceSessionInfo to2DeviceSessionInfo) {
@@ -530,7 +526,7 @@ public final class OcsRestController {
    * @return
    */
   @DeleteMapping(path = "/devices/{deviceId}/sessioninfo",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity> postDeviceSessionInfo(
       @PathVariable(value = "deviceId", required = true) final String deviceId) {
     return Mono.defer(() -> {
@@ -551,8 +547,7 @@ public final class OcsRestController {
    * @param deviceId the device identifier.
    * @return
    */
-  @DeleteMapping(path = "/devices/{deviceId}/blob",
-      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @DeleteMapping(path = "/devices/{deviceId}/blob", produces = MediaType.APPLICATION_JSON_VALUE)
   public Mono<ResponseEntity>
       deleteDevice(@PathVariable(value = "deviceId", required = true) final String deviceId) {
     return Mono.defer(() -> {
