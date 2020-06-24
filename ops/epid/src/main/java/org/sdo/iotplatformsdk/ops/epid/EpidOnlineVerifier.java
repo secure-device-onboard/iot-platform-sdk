@@ -25,7 +25,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Base64;
-
 import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
 import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
 import org.slf4j.Logger;
@@ -64,7 +63,7 @@ public class EpidOnlineVerifier {
 
     URI uri;
     try {
-      uri = new URL("https", EpidSecurityProvider.getEpidOnlineHostUrl(), verifierFile).toURI();
+      uri = new URL(EpidSecurityProvider.getEpidOnlineHostUrl()).toURI().resolve(verifierFile);
     } catch (MalformedURLException | URISyntaxException ex) {
       return EpidLib.EpidStatus.kEpidBadArgErr.getValue();
     }
@@ -77,8 +76,7 @@ public class EpidOnlineVerifier {
     final HttpClient httpClient;
     try {
       httpClient = HttpClient.newBuilder()
-          .sslContext(
-              new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
+          .sslContext(new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
           .build();
     } catch (Exception e) {
       return EpidLib.EpidStatus.kEpidErr.getValue();

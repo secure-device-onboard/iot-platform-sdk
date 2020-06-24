@@ -21,8 +21,9 @@ package org.sdo.iotplatformsdk.ops.epid;
  */
 public class EpidConstants {
 
-  public static final String onlineEpidUrlDefault = "verify.epid.trustedservices.intel.com";
-  public static final String sandboxEpidUrlDefault = "verify.epid-sbx.trustedservices.intel.com";
+  public static final String onlineEpidUrlDefault = "https://verify.epid.trustedservices.intel.com";
+  public static final String sandboxEpidUrlDefault =
+      "https://verify.epid-sbx.trustedservices.intel.com";
 
   public static final int EPID1X_GID_SIZE = 4;
   public static final int EPID2X_GID_SIZE = 16;

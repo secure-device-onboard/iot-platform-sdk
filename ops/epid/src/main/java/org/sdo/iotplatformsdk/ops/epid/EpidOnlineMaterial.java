@@ -33,9 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.xml.bind.DatatypeConverter;
-
 import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
 import org.sdo.iotplatformsdk.common.protocol.config.SslContextFactory;
 import org.slf4j.Logger;
@@ -122,7 +120,7 @@ public class EpidOnlineMaterial {
 
     URI uri;
     try {
-      uri = new URL("https", EpidSecurityProvider.getEpidOnlineHostUrl(), targetFile).toURI();
+      uri = new URL(EpidSecurityProvider.getEpidOnlineHostUrl()).toURI().resolve(targetFile);
     } catch (MalformedURLException | URISyntaxException ex) {
       throw new RuntimeException(ex);
     }
