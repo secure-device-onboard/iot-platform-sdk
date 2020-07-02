@@ -1,16 +1,5 @@
-/*******************************************************************************
- * Copyright 2020 Intel Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- *******************************************************************************/
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
 package org.sdo.iotplatformsdk.to0scheduler.to0library;
 
@@ -27,7 +16,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.CharBuffer;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
-
 import org.sdo.iotplatformsdk.common.protocol.codecs.PublicKeyCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.SignatureBlockCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To0AcceptOwnerCodec;
@@ -92,15 +80,11 @@ public class To0ClientSession {
     final To0Hello hello = new To0Hello();
     StringWriter writer = new StringWriter();
 
-    /**
-     * Sends TO0Hello - message 20 compose
-     */
+    // Sends TO0Hello - message 20 compose
     new To0HelloCodec().encoder().apply(writer, hello);
     String request = writer.toString();
 
-    /**
-     * Sends TO0Hello - message 20 to the server.
-     */
+    // Sends TO0Hello - message 20 to the server.
     final HttpRequest.Builder httpRequestBuilder =
         HttpRequest.newBuilder().header("Content-Type", "application/json");
     HttpRequest httpRequest =
@@ -118,33 +102,23 @@ public class To0ClientSession {
 
     final String authToken = httpResponse.headers().firstValue("Authorization").get();
 
-    /**
-     * Decoding the response from the server Receiving message 21 from the server.
-     */
+    // Decoding the response from the server Receiving message 21 from the server.
     final To0HelloAck helloAck = new To0HelloAckCodec().decoder().apply(CharBuffer.wrap(response));
 
-    /**
-     * Composing To0d of message 22 To compose the message, retrieving the nonce (n3) from the
-     * server response.
-     */
+    // Composing To0d of message 22 To compose the message, retrieving the nonce (n3) from the
+    // server response.
     final To0OwnerSignTo0d to0d = new To0OwnerSignTo0d(proxy, to0WaitSeconds, helloAck.getN3());
 
     writer = new StringWriter();
 
-    /**
-     * Encoding To0d (in message 22 format, to0d is encoded)
-     */
+    // Encoding To0d (in message 22 format, to0d is encoded)
     new To0dEncoder().encode(writer, to0d);
 
-    /**
-     * Calculating the hash of to0d which is a part of to1d.
-     */
+    // Calculating the hash of to0d which is a part of to1d.
     final HashDigest to0dh =
         cryptoLevel.getDigestService().digestOf(US_ASCII.encode(writer.toString()));
 
-    /**
-     * Composing to1d.
-     */
+    // Composing to1d.
     final To1dOwnerRedirect to1dOwnerRedirect = new To1dOwnerRedirect(to1dOwnerRedirectPath);
     final To1SdoRedirect redirect = new To1SdoRedirect(to1dOwnerRedirect.getI1(),
         to1dOwnerRedirect.getDns1(), to1dOwnerRedirect.getPort1(), to0dh);
@@ -156,9 +130,7 @@ public class To0ClientSession {
     // to1d.pk must be null, per protocol spec
     final SignatureBlock to1d = new SignatureBlock(sig.getBo(), null, sig.getSg());
 
-    /**
-     * Composing message 22 and encoding it.
-     */
+    // Composing message 22 and encoding it.
     final To0OwnerSign ownerSign = new To0OwnerSign(to0d, to1d);
     writer = new StringWriter();
     new To0OwnerSignCodec.To0OwnerSignEncoder(
@@ -166,17 +138,13 @@ public class To0ClientSession {
             .encode(writer, ownerSign);
     request = writer.toString();
 
-    /**
-     * Sending request to RZ server
-     */
+    // Sending request to RZ server
     httpRequest = httpRequestBuilder.header("Authorization", authToken)
         .uri(uri.resolve(SdoUriComponentsBuilder.path(To0OwnerSign.ID)))
         .POST(BodyPublishers.ofString(request)).build();
     LOG.info("[HTTP Request]: " + httpRequest.method() + " " + httpRequest.uri() + "\n" + request);
 
-    /**
-     * Receiving message 23 from server
-     */
+    // Receiving message 23 from server
     httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString());
     if (httpResponse.statusCode() != 200) {
       throw new IOException(httpResponse.toString() + " " + httpResponse.body());
@@ -184,20 +152,16 @@ public class To0ClientSession {
     response = null != httpResponse.body() ? httpResponse.body() : "";
     LOG.info("[HTTP Response]: " + httpResponse.toString());
 
-    /**
-     * Decoding message 23 The New Owner Client can drop the connection after this message is
-     * processed. If the new Owner does not receive a Transfer Ownership connection from a Device
-     * within waitSeconds seconds, it must repeat Transfer Ownership Protocol 0 and re-register its
-     * GUID to address association.
-     */
+    // Decoding message 23 The New Owner Client can drop the connection after this message is
+    // processed. If the new Owner does not receive a Transfer Ownership connection from a Device
+    // within waitSeconds seconds, it must repeat Transfer Ownership Protocol 0 and re-register its
+    // GUID to address association.
     final To0AcceptOwner acceptOwner =
         new To0AcceptOwnerCodec().decoder().apply(CharBuffer.wrap(response));
 
-    /**
-     * If the new Owner does not receive a Transfer Ownership connection from a Device within
-     * waitSeconds seconds, it must repeat Transfer Ownership Protocol 0 and re-register its GUID to
-     * address association.
-     */
+    // If the new Owner does not receive a Transfer Ownership connection from a Device within
+    // waitSeconds seconds, it must repeat Transfer Ownership Protocol 0 and re-register its GUID to
+    // address association.
     return acceptOwner.getWs();
   }
 }

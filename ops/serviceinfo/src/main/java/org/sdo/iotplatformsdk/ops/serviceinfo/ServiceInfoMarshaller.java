@@ -1,16 +1,5 @@
-/*******************************************************************************
- * Copyright 2020 Intel Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- *******************************************************************************/
+// Copyright 2020 Intel Corporation
+// SPDX-License-Identifier: Apache 2.0
 
 package org.sdo.iotplatformsdk.ops.serviceinfo;
 
@@ -20,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-
 import org.sdo.iotplatformsdk.common.protocol.rest.SdoConstants;
 import org.sdo.iotplatformsdk.common.protocol.types.ServiceInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.ServiceInfoEntry;
@@ -207,7 +195,7 @@ public final class ServiceInfoMarshaller {
             encodeLen = (((valueFitLen + 1) + 2) / 3) * 4;
             if ((packed + encodeLen) > mtulimit) {
               valueFitLen = valueFitLen - (valueFitLen % 4);
-              break;// if encoded length does not fit then done packing
+              break; // if encoded length does not fit then done packing
             }
             valueFitLen++;
             if (valueFitLen == valueRemaining) {
