@@ -24,7 +24,6 @@
   </parent>
 
   <properties>
-    <com.puppycrawl.tools.checkstyle.version>8.14</com.puppycrawl.tools.checkstyle.version>
     <com.fasterxml.jackson.version>2.10.3</com.fasterxml.jackson.version>
     <org.bouncycastle.version>1.64</org.bouncycastle.version>
     <org.apache.httpcomponents.version>4.5.12</org.apache.httpcomponents.version>
@@ -34,7 +33,7 @@
     <org.mockito.version>1.10.19</org.mockito.version>
     <junit-jupiter.version>5.6.1</junit-jupiter.version>
     <org.apache.maven.plugins.maven-checkstyle-plugin.version>
-      3.0.0
+      3.1.0
     </org.apache.maven.plugins.maven-checkstyle-plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -278,13 +277,6 @@
         <version>
           ${org.apache.maven.plugins.maven-checkstyle-plugin.version}
         </version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${com.puppycrawl.tools.checkstyle.version}</version>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <id>checkstyle-check</id>
