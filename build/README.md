@@ -1,4 +1,4 @@
-# About 
+# About
 
 Docker Script for Building IOT-platform-SDK repository. Using this script you can build the local copy of the repository as well as the latest upstream of the repository.
 
@@ -34,4 +34,4 @@ As the docker script finishes its execution, the ```.war``` files of the IOT-pla
 If you are working behind a proxy network, ensure that both http and https proxy variables are set.
 
     export http_proxy=http-proxy-host:http-proxy-port
-    export https_proxy=https-proxy-host:https-proxy-port 
+    export https_proxy=https-proxy-host:https-proxy-port
