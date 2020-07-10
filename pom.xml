@@ -24,7 +24,7 @@
   </parent>
 
   <properties>
-    <com.puppycrawl.tools.checkstyle.version>8.14</com.puppycrawl.tools.checkstyle.version>
+    <com.puppycrawl.tools.checkstyle.version>8.29</com.puppycrawl.tools.checkstyle.version>
     <com.fasterxml.jackson.version>2.10.3</com.fasterxml.jackson.version>
     <org.bouncycastle.version>1.64</org.bouncycastle.version>
     <org.apache.httpcomponents.version>4.5.12</org.apache.httpcomponents.version>
