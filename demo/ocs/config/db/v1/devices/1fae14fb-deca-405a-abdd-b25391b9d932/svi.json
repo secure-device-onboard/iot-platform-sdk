@@ -31,7 +31,7 @@
     "module": "sdo_sys",
     "msg": "exec",
     "valueLen": -1,
-    "valueId": "sh-linux64",
+    "valueId": "binsh-linux64",
     "enc": "base64"
   }
 ]
