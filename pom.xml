@@ -27,6 +27,8 @@
     <com.fasterxml.jackson.version>2.10.3</com.fasterxml.jackson.version>
     <org.bouncycastle.version>1.64</org.bouncycastle.version>
     <org.apache.httpcomponents.version>4.5.12</org.apache.httpcomponents.version>
+    <org.apache.commons.configuration2.version>2.7</org.apache.commons.configuration2.version>
+    <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <io.projectreactor.version>3.3.4.RELEASE</io.projectreactor.version>
     <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
     <org.slf4j.version>1.7.30</org.slf4j.version>
@@ -176,13 +178,25 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk15on</artifactId>
-			     <version>${org.bouncycastle.version}</version>
+        <version>${org.bouncycastle.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>${org.apache.httpcomponents.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>${commons.beanutils.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-configuration2</artifactId>
+        <version>${org.apache.commons.configuration2.version}</version>
       </dependency>
 
       <dependency>
