@@ -74,6 +74,10 @@ services:
     env_file:
       - ./ops/ops.env
     restart: on-failure:5
+    # Mapping to the user workspace of 'sdouser' as created in the Dockerfile.
+    # If the username is updated in the Dockerfile, please replace 'sdouser' with the same.
+    volumes:
+      - ./ops/config/ondie-ecdsa-material:/home/sdouser/ops/config/ondie-ecdsa-material
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 5
