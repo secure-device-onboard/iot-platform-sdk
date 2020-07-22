@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache 2.0
 
 FROM ubuntu:18.04
+ARG _JAVA_OPTIONS
+ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
 RUN apt-get update && apt-get install -y libssl-dev
 RUN apt-get install -y openjdk-11-jdk
 RUN apt-get install -y haveged
@@ -11,7 +13,6 @@ USER sdouser
 WORKDIR /home/sdouser/
 RUN mkdir ./to0scheduler
 RUN mkdir ./to0scheduler/config/
-COPY to0scheduler/config/application.properties ./to0scheduler/config
 COPY to0scheduler/config/logback-spring.xml ./to0scheduler/config
 COPY to0scheduler/config/to0service-keystore.p12 ./to0scheduler/config
 COPY to0scheduler/config/to0service-truststore ./to0scheduler/config
@@ -20,4 +21,4 @@ COPY to0scheduler/to0scheduler-*.war ./to0scheduler
 EXPOSE 8049
 WORKDIR /home/sdouser/to0scheduler/config/
 CMD ["chmod", "+x", "run-to0scheduler"]
-CMD ["sh", "run-to0scheduler"]
+CMD ["bash", "run-to0scheduler"]
