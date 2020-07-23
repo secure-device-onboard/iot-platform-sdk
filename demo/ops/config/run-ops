@@ -2,14 +2,34 @@
 #
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
-#
-# Specify the proxy here. For example, if the http proxy is 'http://myproxy.com:900',
-# then http_proxy_host would be 'myproxy.com' and http_proxy_port would be '900'.
-# If no proxies are needed, leave the fields empty.
-http_proxy_host=
-http_proxy_port=
-https_proxy_host=
-https_proxy_port=
+
+SYSTEM_PROPERTIES="-Dserver.port=${SERVER_PORT}"
+SYSTEM_PROPERTIES+=" -Dlogging.config=${LOGGING_CONFIG}"
+SYSTEM_PROPERTIES+=" -Dapplication.version=${APPLICATION_VERSION}"
+SYSTEM_PROPERTIES+=" -Dthread.pool.size=${THREAD_POOL_SIZE}"
+
+EPID_PROPERTIES="-Dorg.sdo.epid.epid-online-url=${ORG_SDO_EPID_EPID_ONLINE_URL}"
+EPID_PROPERTIES+=" -Dorg.sdo.epid.test-mode=${ORG_SDO_EPID_TEST_MODE}"
+
+OCS_ENDPOINT_PROPERTIES="-Drest.api.server=${REST_API_SERVER}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.device.state.path=${REST_API_DEVICE_STATE_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.voucher.path=${REST_API_VOUCHER_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.serviceinfo.path=${REST_API_SERVICEINFO_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.serviceinfo.value.path=${REST_API_SERVICEINFO_VALUE_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.psi.path=${REST_API_PSI_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.error.path=${REST_API_ERROR_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.setupinfo.path=${REST_API_SETUPINFO_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.signature.path=${REST_API_SIGNATURE_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.ciphers.path=${REST_API_CIPHERS_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.session.path=${REST_API_SESSION_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.owner.resale.support.path=${REST_API_OWNER_RESALE_SUPPORT_PATH}"
+
+CLIENT_TLS_PROPERTIES="-Dclient.ssl.key-store-type=${CLIENT_SSL_KEYSTORE_TYPE}"
+CLIENT_TLS_PROPERTIES+=" -Dclient.ssl.trust-store-type=${CLIENT_SSL_TRUSTSTORE_TYPE}"
+CLIENT_TLS_PROPERTIES+=" -Dclient.ssl.key-store=${CLIENT_SSL_KEYSTORE}"
+CLIENT_TLS_PROPERTIES+=" -Dclient.ssl.trust-store=${CLIENT_SSL_TRUSTSTORE}"
+CLIENT_TLS_PROPERTIES+=" -Dclient.ssl.key-store-password=${CLIENT_SSL_KEYSTORE_PASSWORD}"
+CLIENT_TLS_PROPERTIES+=" -Dclient.ssl.trust-store-password=${CLIENT_SSL_TRUSTSTORE_PASSWORD}"
 
 # The pattern to find the binary executable file
 bin_file=ops*.war
@@ -25,5 +45,5 @@ bin_path=$(find $base_dir -name $bin_file)
 if [ -z "$bin_path" ]; then
   echo "Couldn't find binary file. Please recheck binary package"
 else
-  exec java -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port -Dhttps.proxyHost=$https_proxy_host -Dhttps.proxyPort=$https_proxy_port -jar -Djava.library.path=$base_dir/sdo $bin_path
+  exec java ${SYSTEM_PROPERTIES} ${EPID_PROPERTIES} ${OCS_ENDPOINT_PROPERTIES} ${CLIENT_TLS_PROPERTIES} -jar -Djava.library.path=$base_dir/sdo $bin_path
 fi

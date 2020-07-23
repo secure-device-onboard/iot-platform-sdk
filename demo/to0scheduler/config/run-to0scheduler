@@ -2,14 +2,32 @@
 #
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
-#
-# Specify the proxy here. For example, if the http proxy is 'http://myproxy.com:900',
-# then http_proxy_host would be 'myproxy.com' and http_proxy_port would be '900'.
-# If no proxies are needed, leave the fields empty.
-http_proxy_host=
-http_proxy_port=
-https_proxy_host=
-https_proxy_port=
+
+SYSTEM_PROPERTIES="-Dserver.port=${SERVER_PORT}"
+SYSTEM_PROPERTIES+=" -Dlogging.config=${LOGGING_CONFIG}"
+SYSTEM_PROPERTIES+=" -Dapplication.version=${APPLICATION_VERSION}"
+SYSTEM_PROPERTIES+=" -Dsession.pool.size=${SESSION_POOL_SIZE}"
+SYSTEM_PROPERTIES+=" -Dthread.pool.size=${THREAD_POOL_SIZE}"
+
+TO0_PROPERTIES="-Dorg.sdo.to0.ownersign.to0d.ws=${ORG_SDO_TO0_OWNERSIGN_TO0D_WS}"
+TO0_PROPERTIES+=" -Dorg.sdo.to0.ownersign.to1d.bo=${ORG_SDO_TO0_OWNERSIGN_TO1D_BO}"
+TO0_PROPERTIES+=" -Dorg.sdo.to0.tls.test-mode=${ORG_SDO_TO0_TLS_TEST_MODE}"
+
+OCS_ENDPOINT_PROPERTIES="-Drest.api.server=${REST_API_SERVER}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.device.state.path=${REST_API_DEVICE_STATE_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.voucher.path=${REST_API_VOUCHER_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.error.path=${REST_API_ERROR_PATH}"
+OCS_ENDPOINT_PROPERTIES+=" -Drest.api.signature.path=${REST_API_SIGNATURE_PATH}"
+
+JAVA_SPRING_TLS_PROPERTIES="-Dserver.ssl.key-store-type=${SERVER_SSL_KEYSTORE_TYPE}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.trust-store-type=${SERVER_SSL_TRUSTSTORE_TYPE}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.key-store=${SERVER_SSL_KEYSTORE}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.trust-store=${SERVER_SSL_TRUSTSTORE}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.key-store-password=${SERVER_SSL_KEYSTORE_PASSWORD}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.trust-store-password=${SERVER_SSL_TRUSTSTORE_PASSWORD}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.client-auth=${SERVER_SSL_CLIENT_AUTH}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.ciphers=${SERVER_SSL_CIPHERS}"
+JAVA_SPRING_TLS_PROPERTIES+=" -Dserver.ssl.enabled-protocols=${SERVER_SSL_ENABLED_PROTOCOLS}"
 
 # The pattern to find the binary executable file
 bin_file=to0scheduler*.war
@@ -25,5 +43,5 @@ bin_path=$(find $base_dir -name $bin_file)
 if [ -z "$bin_path" ]; then
   echo "Couldn't find binary file. Please recheck binary package"
 else
-  exec java -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port -Dhttps.proxyHost=$https_proxy_host -Dhttps.proxyPort=$https_proxy_port -jar -Djava.library.path=$base_dir/sdo $bin_path
+  exec java ${SYSTEM_PROPERTIES} ${TO0_PROPERTIES} ${OCS_ENDPOINT_PROPERTIES} ${JAVA_SPRING_TLS_PROPERTIES} -jar -Djava.library.path=$base_dir/sdo $bin_path
 fi

@@ -16,13 +16,9 @@ services:
       context: .
       dockerfile: to0scheduler/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - "http_proxy=${http_proxy}"
-      - "https_proxy=${https_proxy}"
-      - "no_proxy=${no_proxy}"
+        - _JAVA_OPTIONS
+    env_file:
+      - ./to0scheduler/to0scheduler.env
     restart: on-failure:5
     # Mapping to the user workspace of 'sdouser' as created in the Dockerfile.
     # If the username is updated in the Dockerfile, please replace 'sdouser' with the same.
@@ -47,13 +43,9 @@ services:
       context: .
       dockerfile: ocs/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - "http_proxy=${http_proxy}"
-      - "https_proxy=${https_proxy}"
-      - "no_proxy=${no_proxy}"
+        - _JAVA_OPTIONS
+    env_file:
+      - ./ocs/ocs.env
     restart: on-failure:5
     # Mapping to the user workspace of 'sdouser' as created in the Dockerfile.
     # If the username is updated in the Dockerfile, please replace 'sdouser' with the same.
@@ -78,13 +70,9 @@ services:
       context: .
       dockerfile: ops/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - "http_proxy=${http_proxy}"
-      - "https_proxy=${https_proxy}"
-      - "no_proxy=${no_proxy}"
+        - _JAVA_OPTIONS
+    env_file:
+      - ./ops/ops.env
     restart: on-failure:5
     mem_limit: 500m
     mem_reservation: 200m
