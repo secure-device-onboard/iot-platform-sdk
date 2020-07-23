@@ -16,6 +16,8 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -102,10 +104,11 @@ public class FsRestClient {
    * @param request content to be sent in request body.
    */
   public void postDevicesForTo0(final To0Request request) {
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext()).connectTimeout(timeout)
+        .executor(executor).build();
     try {
       final String requestBody = new ObjectMapper().writeValueAsString(request);
-      final HttpClient httpClient =
-          HttpClient.newBuilder().sslContext(sslContext()).connectTimeout(timeout).build();
       final HttpRequest.Builder httpRequestBuilder =
           HttpRequest.newBuilder().header("Content-Type", "application/json");
       final HttpRequest httpRequest = httpRequestBuilder.uri(URI.create(to0RestApi))
@@ -118,6 +121,10 @@ public class FsRestClient {
     } catch (Exception e) {
       logger.error("Error occurred while sending devices for TO0. " + e.getMessage());
       logger.debug(e.getMessage(), e);
+    } finally {
+      // avoiding memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
     }
   }
 }

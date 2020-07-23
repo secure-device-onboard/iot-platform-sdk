@@ -5,7 +5,6 @@ package org.sdo.iotplatformsdk.to0scheduler.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import java.net.http.HttpClient;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -119,8 +118,7 @@ public class To0ServiceConfiguration {
           sslContext = sslContextFactory().getObject();
         }
         return new To0ClientSession(signatureServiceFactory(),
-            Paths.get(".").toUri().resolve(redirectInfo).normalize(), HttpClient.newBuilder()
-                .sslContext(sslContext).connectTimeout(httpClientTimeout).build());
+            Paths.get(".").toUri().resolve(redirectInfo).normalize(), sslContext);
       }
     };
   }
