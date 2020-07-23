@@ -72,6 +72,8 @@ The Protocol Reference Implementation (PRI), containing Rendezvous and Device
 can be used to run the demo. For more information on setting up PRI, follow the
 product's README.
 
+**NOTE**: The IOT Platform SDK demo is provided solely to demonstrate interoperation of the IoT Platform SDK components (ocs, ops, and to0scheduler) with the Rendezvous Service and Device. _This demo is not recommended for use in any production capacity._  Appropriate security measures with respect to key-store management and configuration management should be considered while performing production deployment of any Secure Device Onboard component.
+
 The following instructions follow these notations:
 
 * `<sdo-pri-root>`: Base location of the PRI source code
