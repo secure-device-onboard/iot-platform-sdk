@@ -13,6 +13,8 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.net.ssl.SSLContext;
 import org.sdo.iotplatformsdk.common.rest.DeviceState;
 import org.sdo.iotplatformsdk.common.rest.SignatureResponse;
@@ -55,14 +57,15 @@ public class RestClient {
    * @return the owner voucher.
    */
   public String getDeviceVoucher(final String deviceId) {
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
+        .connectTimeout(httpClientTimeout).executor(executor).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.voucher.path");
       final String revisedPath = path.replace("{deviceId}", deviceId);
       final URI uri = URI.create(apiServer + revisedPath);
 
-      final HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-          .connectTimeout(httpClientTimeout).build();
       final HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder()
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
           .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -79,8 +82,11 @@ public class RestClient {
           "Error occurred while fetching the voucher for " + deviceId + ". " + e.getMessage());
       logger.debug(e.getMessage(), e);
       return null;
+    } finally {
+      // avoiding memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
     }
-
   }
 
   /**
@@ -91,6 +97,9 @@ public class RestClient {
    * @param state    device state object.
    */
   public void postDeviceState(final String deviceId, final DeviceState state) {
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
+        .connectTimeout(httpClientTimeout).executor(executor).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.device.state.path");
@@ -98,8 +107,6 @@ public class RestClient {
       final URI uri = URI.create(apiServer + revisedPath);
 
       final String requestBody = objectMapper().writeValueAsString(state);
-      final HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-          .connectTimeout(httpClientTimeout).build();
       final HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder()
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       final HttpRequest httpRequest =
@@ -113,6 +120,10 @@ public class RestClient {
       logger.error(
           "Error occurred while setting the devices state for " + deviceId + ". " + e.getMessage());
       logger.debug(e.getMessage(), e);
+    } finally {
+      // avoiding memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
     }
   }
 
@@ -125,14 +136,15 @@ public class RestClient {
    * @return
    */
   public SignatureResponse signatureOperation(final UUID uuid, final String bo) {
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
+        .connectTimeout(httpClientTimeout).executor(executor).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.signature.path");
       final String revisedPath = path.replace("{deviceId}", uuid.toString());
       final URI uri = URI.create(apiServer + revisedPath);
 
-      final HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-          .connectTimeout(httpClientTimeout).build();
       final HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder()
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
           .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
@@ -152,6 +164,10 @@ public class RestClient {
           + e.getMessage());
       logger.debug(e.getMessage(), e);
       return null;
+    } finally {
+      // avoiding memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
     }
   }
 
@@ -163,6 +179,9 @@ public class RestClient {
    * @param state    device state information containing the error.
    */
   public void postError(final String deviceId, final DeviceState state) {
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+    HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
+        .connectTimeout(httpClientTimeout).executor(executor).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.error.path");
@@ -170,8 +189,6 @@ public class RestClient {
       final URI uri = URI.create(apiServer + revisedPath);
 
       final String requestBody = objectMapper().writeValueAsString(state);
-      final HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-          .connectTimeout(httpClientTimeout).build();
       final HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder()
           .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       final HttpRequest httpRequest =
@@ -185,6 +202,10 @@ public class RestClient {
       logger.error(
           "Error occurred while setting the devices state for " + deviceId + ". " + e.getMessage());
       logger.debug(e.getMessage(), e);
+    } finally {
+      // avoiding memory leaks.
+      executor.shutdownNow();
+      httpClient = null;
     }
   }
 }

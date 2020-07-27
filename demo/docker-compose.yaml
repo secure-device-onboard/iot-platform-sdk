@@ -27,7 +27,7 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 5
-    pids_limit: 100
+    pids_limit: 300
     network_mode: host
     
   ocs:
@@ -54,7 +54,7 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 5
-    pids_limit: 100
+    pids_limit: 300
     network_mode: host
 
   ops:
@@ -77,5 +77,5 @@ services:
     mem_limit: 500m
     mem_reservation: 200m
     cpu_shares: 5
-    pids_limit: 100
+    pids_limit: 300
     network_mode: host
