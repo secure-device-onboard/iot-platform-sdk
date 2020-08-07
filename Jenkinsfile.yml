@@ -78,7 +78,7 @@ node('ubuntu18.04-OnDemand'){
       sh '''
         cd sdo-test
         mkdir voucher
-        mvn clean test -Dgroups=docker_oc_sct_crirv_smoketest
+        mvn clean verify -Dgroups=docker_oc_sct_crirv_smoketest
       '''
     }
     } finally {
