@@ -48,9 +48,18 @@ public class OpsOnDieEcdsaMaterialUtil implements OnDieEcdsaMaterialUtil {
     }
   }
 
+  /* The path must be a valid URL, from which the last segment will be extracted and
+   * used as CRL name.
+   */
   @Override
-  public byte[] getCrl(final String crlName) {
+  public byte[] getCrl(final String crlPath) {
     try {
+      final URL url = new URL(crlPath);
+      final Path path = Paths.get(url.getFile());
+      final String crlName = path.getFileName().toString();
+      if (crlName == null) {
+        throw new IllegalArgumentException();
+      }
       if (!crlsMap.containsKey(crlName)) {
         final Path crl = Paths.get(ondieEcdsaMaterialPath, crlName);
         if (null != crl && !crl.toFile().exists()) {
@@ -61,7 +70,7 @@ public class OpsOnDieEcdsaMaterialUtil implements OnDieEcdsaMaterialUtil {
       }
       return crlsMap.get(crlName);
     } catch (Exception e) {
-      LOGGER.error("Error in loading {} from {}.", crlName, ondieEcdsaMaterialPath);
+      LOGGER.error("Error in loading {} from {}.", crlPath, ondieEcdsaMaterialPath);
       return new byte[0];
     }
   }

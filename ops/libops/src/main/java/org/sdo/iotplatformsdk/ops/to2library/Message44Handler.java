@@ -141,6 +141,8 @@ public class Message44Handler {
             getEpidOptions().getTestMode());
         EpidSecurityProvider.load();
 
+      } else if (pk instanceof OnDieEcdsaKey384) {
+        certPath = proxy.getDc();
       } else { // pk not epid
 
         // 5.6.6 non-epid device keys must result in a null TO2.ProveDevice.pk

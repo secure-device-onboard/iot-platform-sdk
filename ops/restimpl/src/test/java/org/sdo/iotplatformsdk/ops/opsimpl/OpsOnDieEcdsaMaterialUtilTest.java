@@ -34,7 +34,8 @@ public class OpsOnDieEcdsaMaterialUtilTest extends TestCase {
 
   @Test
   public void testGetCrl() throws CertificateException {
-    assertTrue(Arrays.equals(crl, opsOnDieEcdsaMaterialUtil.getCrl("ATS_00002102_OnDie_CA.crl")));
+    assertTrue(Arrays.equals(crl, opsOnDieEcdsaMaterialUtil
+        .getCrl("https://pre1-tsci.intel.com/content/OD/crls/ATS_00002102_OnDie_CA.crl")));
   }
 
 }
