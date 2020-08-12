@@ -15,7 +15,8 @@ public enum SignatureType {
   ECDSA_P_384(14),
   EPID10(90),
   EPID11(91),
-  EPID20(92);
+  EPID20(92),
+  ON_DIE_ECDSA_384(93);
 
   private final int id;
 

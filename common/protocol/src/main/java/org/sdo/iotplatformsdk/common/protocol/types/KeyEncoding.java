@@ -31,7 +31,11 @@ public enum KeyEncoding {
    *
    * @see <a href=https://01.org/epid-sdk>The Intel EPID SDK</a>
    */
-  EPID(4);
+  EPID(4),
+  /**
+   * Intel OnDie-ECDSA.
+   */
+  ONDIE_ECDSA(5);
 
   private final int value;
 
