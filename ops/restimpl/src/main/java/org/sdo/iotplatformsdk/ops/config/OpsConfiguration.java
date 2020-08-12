@@ -13,8 +13,10 @@ import org.sdo.iotplatformsdk.common.protocol.config.ObjectFactory;
 import org.sdo.iotplatformsdk.common.protocol.config.OwnershipProxyStorage;
 import org.sdo.iotplatformsdk.common.protocol.config.SecureRandomFactory;
 import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
+import org.sdo.iotplatformsdk.common.protocol.security.OnDieEcdsaSignatureValidator;
 import org.sdo.iotplatformsdk.common.protocol.security.SignatureServiceFactory;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsAsymKexCodec;
+import org.sdo.iotplatformsdk.ops.opsimpl.OpsOnDieEcdsaMaterialUtil;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsOwnerEventHandlerFactory;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsPropertiesLoader;
 import org.sdo.iotplatformsdk.ops.opsimpl.OpsProxyStorage;
@@ -73,6 +75,12 @@ public class OpsConfiguration implements WebMvcConfigurer {
           : false;
   private final String epidOnlineUrl =
       OpsPropertiesLoader.getProperty("org.sdo.epid.epid-online-url");
+  private final String ondieEcdsaMaterialPath =
+      OpsPropertiesLoader.getProperty("org.sdo.ops.ondie-ecdsa-material-path");
+  private final String sourceUrls =
+      OpsPropertiesLoader.getProperty("org.sdo.ops.ondie-ecdsa-material-urls");
+  private final boolean updateCrls =
+      Boolean.valueOf(OpsPropertiesLoader.getProperty("org.sdo.ops.ondie-ecdsa-material-update"));
 
   @Override
   public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
@@ -282,7 +290,7 @@ public class OpsConfiguration implements WebMvcConfigurer {
   protected Message44Handler message44Handler() throws Exception {
     final Message44Handler message44Handler =
         new Message44Handler(secureRandomFactory().getObject(), sessionStorageFactory().getObject(),
-            keyExchangeDecoder(), serviceInfoModules());
+            keyExchangeDecoder(), serviceInfoModules(), onDieEcdsaSignatureValidator());
     message44Handler.setEpidOptions(epidOptionBean());
     return message44Handler;
   }
@@ -327,5 +335,23 @@ public class OpsConfiguration implements WebMvcConfigurer {
   protected Message255Handler message255Handler() throws Exception {
     return new Message255Handler(sessionStorageFactory().getObject(),
         ownerEventHandlerFactory().getObject());
+  }
+
+  /**
+   * Creates and returns a singleton instance of {@link OpsOnDieEcdsaMaterialUtil}.
+   * Calls to this method returns the same instance, always.
+   */
+  @Bean
+  protected OpsOnDieEcdsaMaterialUtil opsOnDieEcdsaMaterialUtil() {
+    return new OpsOnDieEcdsaMaterialUtil(ondieEcdsaMaterialPath, sourceUrls, updateCrls);
+  }
+
+  /**
+   * Creates and returns a singleton instance of {@link OpsOnDieEcdsaMaterialUtil}.
+   * Calls to this method returns the same instance, always.
+   */
+  @Bean
+  protected OnDieEcdsaSignatureValidator onDieEcdsaSignatureValidator() {
+    return new OnDieEcdsaSignatureValidator(opsOnDieEcdsaMaterialUtil());
   }
 }

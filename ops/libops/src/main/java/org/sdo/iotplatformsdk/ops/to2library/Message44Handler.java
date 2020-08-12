@@ -28,6 +28,7 @@ import org.sdo.iotplatformsdk.common.protocol.codecs.SignatureBlockCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To2GetNextDeviceServiceInfoCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.To2ProveDeviceCodec;
 import org.sdo.iotplatformsdk.common.protocol.config.EpidOptionBean;
+import org.sdo.iotplatformsdk.common.protocol.security.OnDieEcdsaSignatureValidator;
 import org.sdo.iotplatformsdk.common.protocol.security.Signatures;
 import org.sdo.iotplatformsdk.common.protocol.security.cipher.To2CipherContext;
 import org.sdo.iotplatformsdk.common.protocol.types.EncryptedMessage;
@@ -35,6 +36,7 @@ import org.sdo.iotplatformsdk.common.protocol.types.EpidKey;
 import org.sdo.iotplatformsdk.common.protocol.types.EpidSignatureParameterSpec;
 import org.sdo.iotplatformsdk.common.protocol.types.MessageType;
 import org.sdo.iotplatformsdk.common.protocol.types.Nonce;
+import org.sdo.iotplatformsdk.common.protocol.types.OnDieEcdsaKey384;
 import org.sdo.iotplatformsdk.common.protocol.types.OwnershipProxy;
 import org.sdo.iotplatformsdk.common.protocol.types.PreServiceInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.SdoError;
@@ -61,6 +63,7 @@ public class Message44Handler {
   private Set<ServiceInfoModule> serviceInfoModules = new HashSet<>();
   private final SessionStorage sessionStorage;
   private final KeyExchangeDecoder keyExchangeDecoder;
+  private final OnDieEcdsaSignatureValidator onDieEcdsaSignatureValidator;
 
   /**
    * Builds {@link PreServiceInfo}.
@@ -79,11 +82,13 @@ public class Message44Handler {
    * Constructor.
    */
   public Message44Handler(final SecureRandom secureRandom, final SessionStorage sessionStorage,
-      final KeyExchangeDecoder keyExchangeDecoder, Set<ServiceInfoModule> serviceInfoModules) {
+      final KeyExchangeDecoder keyExchangeDecoder, Set<ServiceInfoModule> serviceInfoModules,
+      OnDieEcdsaSignatureValidator onDieEcdsaSignatureValidator) {
     this.secureRandom = secureRandom;
     this.sessionStorage = sessionStorage;
     this.keyExchangeDecoder = keyExchangeDecoder;
     this.serviceInfoModules = serviceInfoModules;
+    this.onDieEcdsaSignatureValidator = onDieEcdsaSignatureValidator;
   }
 
   public SecureRandom getSecureRandom() {
@@ -130,17 +135,19 @@ public class Message44Handler {
       }
 
       PublicKey pk = signedProveDevice.getPk();
-
+      CertPath certPath = null;
       if (pk instanceof EpidKey) {
         EpidSecurityProvider.setEpidOptions(getEpidOptions().getEpidOnlineUrl(),
             getEpidOptions().getTestMode());
         EpidSecurityProvider.load();
 
+      } else if (pk instanceof OnDieEcdsaKey384) {
+        certPath = proxy.getDc();
       } else { // pk not epid
 
         // 5.6.6 non-epid device keys must result in a null TO2.ProveDevice.pk
         if (null == pk) {
-          CertPath certPath = proxy.getDc();
+          certPath = proxy.getDc();
 
           if (null != certPath) {
             List<? extends Certificate> certs = certPath.getCertificates();
@@ -165,16 +172,21 @@ public class Message44Handler {
         } // pk null?
       } // pk epid?
 
-      final AlgorithmParameterSpec sigParams;
-      if (pk instanceof EpidKey) {
-        sigParams = new EpidSignatureParameterSpec(proveDevice.getN6(), proveDevice.getAi());
+      final boolean isVerified;
+      if (pk instanceof OnDieEcdsaKey384) {
+        isVerified = onDieEcdsaSignatureValidator.verifySignature(
+            Buffers.unwrap(US_ASCII.encode(bo.duplicate())),
+            Buffers.unwrap(signedProveDevice.getSg()), certPath);
       } else {
-        sigParams = null;
+        final AlgorithmParameterSpec sigParams;
+        if (pk instanceof EpidKey) {
+          sigParams = new EpidSignatureParameterSpec(proveDevice.getN6(), proveDevice.getAi());
+        } else {
+          sigParams = null;
+        }
+        isVerified = Signatures.verifySignature(Buffers.unwrap(US_ASCII.encode(bo.duplicate())),
+            Buffers.unwrap(signedProveDevice.getSg()), pk, sigParams);
       }
-
-      final boolean isVerified =
-          Signatures.verifySignature(Buffers.unwrap(US_ASCII.encode(bo.duplicate())),
-              Buffers.unwrap(signedProveDevice.getSg()), pk, sigParams);
 
       if (!isVerified) {
         SdoError err =

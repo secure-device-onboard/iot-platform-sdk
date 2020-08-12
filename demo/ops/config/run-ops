@@ -11,6 +11,10 @@ SYSTEM_PROPERTIES+=" -Dthread.pool.size=${THREAD_POOL_SIZE}"
 EPID_PROPERTIES="-Dorg.sdo.epid.epid-online-url=${ORG_SDO_EPID_EPID_ONLINE_URL}"
 EPID_PROPERTIES+=" -Dorg.sdo.epid.test-mode=${ORG_SDO_EPID_TEST_MODE}"
 
+ONDIE_ECDSA_PROPERTIES="-Dorg.sdo.ops.ondie-ecdsa-material-path=${ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_PATH}"
+ONDIE_ECDSA_PROPERTIES+=" -Dorg.sdo.ops.ondie-ecdsa-material-urls=${ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_URLS}"
+ONDIE_ECDSA_PROPERTIES+=" -Dorg.sdo.ops.ondie-ecdsa-material-update=${ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_UPDATE}"
+
 OCS_ENDPOINT_PROPERTIES="-Drest.api.server=${REST_API_SERVER}"
 OCS_ENDPOINT_PROPERTIES+=" -Drest.api.device.state.path=${REST_API_DEVICE_STATE_PATH}"
 OCS_ENDPOINT_PROPERTIES+=" -Drest.api.voucher.path=${REST_API_VOUCHER_PATH}"
@@ -45,5 +49,5 @@ bin_path=$(find $base_dir -name $bin_file)
 if [ -z "$bin_path" ]; then
   echo "Couldn't find binary file. Please recheck binary package"
 else
-  exec java ${SYSTEM_PROPERTIES} ${EPID_PROPERTIES} ${OCS_ENDPOINT_PROPERTIES} ${CLIENT_TLS_PROPERTIES} -jar -Djava.library.path=$base_dir/sdo $bin_path
+  exec java ${SYSTEM_PROPERTIES} ${EPID_PROPERTIES} ${ONDIE_ECDSA_PROPERTIES} ${OCS_ENDPOINT_PROPERTIES} ${CLIENT_TLS_PROPERTIES} -jar -Djava.library.path=$base_dir/sdo $bin_path
 fi

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.sdo.iotplatformsdk.common.protocol.config.EpidOptionBean;
 import org.sdo.iotplatformsdk.common.protocol.security.AsymKexCodec;
+import org.sdo.iotplatformsdk.common.protocol.security.OnDieEcdsaSignatureValidator;
 import org.sdo.iotplatformsdk.common.protocol.types.KeyExchangeType;
 import org.sdo.iotplatformsdk.common.protocol.types.PreServiceInfo;
 import org.sdo.iotplatformsdk.common.protocol.types.PreServiceInfoEntry;
@@ -51,6 +52,7 @@ class Message44HandlerTest {
   SecureRandom secureRandom;
   SessionStorage sessionStorage;
   Set<ServiceInfoModule> serviceInfoModules;
+  OnDieEcdsaSignatureValidator onDieEcdsaSignatureValidator;
   String message44;
   To2DeviceSessionInfo to2DeviceSessionInfo;
 
@@ -103,6 +105,7 @@ class Message44HandlerTest {
     message45Store = new Message45Store();
     message47Store = new Message47Store();
     serviceInfoModules = new HashSet<ServiceInfoModule>();
+    onDieEcdsaSignatureValidator = Mockito.mock(OnDieEcdsaSignatureValidator.class);
     sessionStorage = Mockito.mock(SessionStorage.class);
     to2DeviceSessionInfo = new To2DeviceSessionInfo();
     uuid = new byte[16];
@@ -115,8 +118,8 @@ class Message44HandlerTest {
 
     Set<ServiceInfoModule> modules = new HashSet<ServiceInfoModule>();
 
-    message44Handler =
-        new Message44Handler(secureRandom, sessionStorage, keyExchangeDecoder, modules);
+    message44Handler = new Message44Handler(secureRandom, sessionStorage, keyExchangeDecoder,
+        modules, onDieEcdsaSignatureValidator);
     message44Handler.setEpidOptions(epidOptions);
   }
 

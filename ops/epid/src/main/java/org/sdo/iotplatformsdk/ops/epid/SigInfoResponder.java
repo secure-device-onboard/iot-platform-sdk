@@ -24,6 +24,7 @@ public class SigInfoResponder {
 
       case ECDSA_P_256:
       case ECDSA_P_384:
+      case ON_DIE_ECDSA_384:
         // EC types use an empty EPIDInfo
         return new SigInfo(ea.getSgType(), ByteBuffer.allocate(0));
 
