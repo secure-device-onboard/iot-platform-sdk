@@ -68,6 +68,7 @@ public class To0PropertiesLoader {
         propertiesMap.put(property, fileBasedConfiguration.getString(property));
       }
     }
-    return propertiesMap.get(property);
+    return (null == propertiesMap.get(property) || propertiesMap.get(property).isBlank()) ? null
+        : propertiesMap.get(property);
   }
 }
