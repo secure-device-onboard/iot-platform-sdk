@@ -82,52 +82,20 @@ The following instructions follow these notations:
 
 ## Updating the proxy information (Optional)
 
-Update the proxy information specified using the below mentioned properties:
+Update the proxy information in _JAVA_OPTIONS as
+`_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port`, where
 * `http_proxy_host`: Represents the http proxy hostname. Typically, it is an IP address or domain name in the proxy URL.
 * `http_proxy_port`: Represents the http proxy port. Typically, it is the port number in the proxy URL.
 * `https_proxy_host`: Represents the https proxy hostname. Typically, it is an IP address or domain name in the proxy URL.
 * `https_proxy_port`: Represents the https proxy port. Typically, it is the port number in the proxy URL.
 Specify the combination of the hostname and port information together for either http, https or both.
-If no proxy needs to be specified, leave the fields blank.
+If no proxy needs to be specified, do not specify the flags in _JAVA_OPTIONS.
 
-These properties are present in the following script files:
-* <ops-config-dir>/run-ops
-* <ocs-config-dir>/run-ocs
-* <to0scheduler-config-dir>/run-to0scheduler
+## Configuring Ondie ECDSA properties
 
-## Running the SDO IoT Platform SDK demo manually
-
-Update the proxy information (if any) as per the steps outlined previously.
-
-Open a new terminal window and start the rendezvous service:
-```
-$ cd <pri-rendezvous-dir>
-$ ./rendezvous
-```
-
-Open a new terminal window and start the to0scheduler service:
-```
-$ cd <to0scheduler-config-dir>
-$ ./run-to0scheduler
-```
-
-Open a new terminal window and start the ocs service:
-```
-$ cd <ocs-config-dir>
-$ ./run-ocs
-```
-
-Open a new terminal window and start the ops service:
-```
-$ cd <ops-config-dir>
-$ ./run-ops
-```
-
-Open a new terminal window and start the device service:
-```
-$ cd <pri-device-dir>
-$ ./device
-```
+For successful onboarding of Ondie ECDSA clients, appropriate CRL files must be present in the path as specified by the property `org.sdo.ops.ondie-ecdsa-material-path`.
+If the CRL files need to be downloaded into the same path, set the property `org.sdo.ops.ondie-ecdsa-material-urls` with a list of appropriate URLs from where the CRL files will be downloaded.
+If demo is being run in a closed network or if no update needs to be made to the existing CRL files in the same path, set the property `org.sdo.ops.ondie-ecdsa-material-update` value to 'false'.
 
 ## Running the SDO IoT Platform SDK demo using the Docker scripts
 
@@ -145,7 +113,7 @@ $ ./rendezvous
 Open a new terminal window and start the SDO IoT Platform SDK services:
 ```
 $ cd <sdo-iot-platform-sdk-root>/demo
-$ sudo docker-compose up
+$ docker-compose up --build
 ```
 
 Open a new terminal window and start the device service:
@@ -156,5 +124,59 @@ $ ./device
 
 NOTE: To re-trigger TO0 for a device for which TO0 was previously done and is currently active,
 please delete the file 'state.json' located at <ocs-config-dir>/db/v1/devices/<deviceID>/.
+
+## Configuring properties in SDO IoT Platform SDK
+
+| Property name                           | Applicable to          | Description                                | Value type           |
+|-----------------------------------------|------------------------|--------------------------------------------|----------------------|
+| fs.root.dir                             | OCS                    | Root directory of the file-system database. | URI                     |
+| fs.owner.keystore                       | OCS                    | Path to the owner's keystore that contains multiple owner key-pairs. Any new owner entry must be added as 'PrivateKeyEntry' in the keystore. | URI                     |
+| fs.owner.keystore-password              | OCS                    | Password of the owner keystore as specified by the property fs.owner.keystore. Every key-pair within the keystore, that are stored as 'PrivateKeyEntry', MUST have the exact same password. | String                     |
+| fs.devices.dir                          | OCS                    | Path where all the device information are stored, i.e the <device-guid> directories, relative to fs.root.dir. | URI                     |
+| fs.values.dir                           | OCS                    | Path where service-info files are stored, i.e the 'values' directory, relative to fs.root.dir. | URI |
+| to0.rest.api                            | OCS                    | REST endpoint that points to the API hosted by To0Scheduler. | URL                     |
+| to0.waitseconds                         | OCS                    | The suggested number of seconds, as sent by the To0Scheduler, until which TO0 is valid in Rendezvous. | Number                     |
+| to0.scheduler.interval                  | OCS                    | The interval in seconds, at which this service makes call to the url specified by the property to0.rest.api, to schedule devices for TO0. | Number                     |
+| to2.credential-reuse.enabled            | OCS                    | The flag that enables or disables the SDO Credential-Reuse condition. If true, the same GUID and Rendezvous Instructions are sent to the Owner (OPS). If false, new GUID and new/same Rendezvous information is sent.| Boolean                     |
+| to2.owner-resale.enabled                | OCS                    | The flag that determines whether the Resale protocol is supported by the Owner (OPS). If true, resale protocol is supported as per the specification. | Boolean                     |
+| thread.pool.size                        | OPS, To0Scheduler      | Total number of threads the TaskExecutor is initalized with. | Number                        |
+| org.sdo.epid.epid-online-url            | OPS                    | The URL of the Epid Verification Service. If this property is set, the online verification of EPID keys is performed by making a request to this URL. | URL                    |
+| org.sdo.epid.test-mode                  | OPS                    | The test-mode parameter indicates whether we should be using EPID development (sandbox) service for verification of the EPID key. Only the sandbox service allows usage of test keys.| Boolean                        |
+| org.sdo.ops.ondie-ecdsa-material-path   | OPS                    | Path to the directpry that contains ondie ECDSA CRL files. | URI                        |
+| org.sdo.ops.ondie-ecdsa-material-urls   | OPS                    | List of URLs seperated by 'comma (,)' as delimiter. The Ondie ECDSA CRL files will be fetched from the URLs listed.                          | List of URLs             |
+| org.sdo.ops.ondie-ecdsa-material-update | OPS                    | If the value is set to 'true', the ondie ECDSA CRL files will be downloaded from the URLs listed in org.sdo.ops.ondie-ecdsa-material-urls and saved at org.sdo.ops.ondie-ecdsa-material-path.|  Boolean                       |
+| rest.api.server                         | OPS, To0Scheduler      | The domain name and port at which OCS is running. | URL                        |
+| rest.api.device.state.path              | OPS, To0Scheduler      | REST endpoint path at OCS for device state operations. | URI                        |
+| rest.api.voucher.path                   | OPS, To0Scheduler      | REST endpoint path at OCS for device voucher operations. | URI                        |
+| rest.api.error.path                     | OPS, To0Scheduler      | REST endpoint path at OCS for protocol error operations. | URI                        |
+| rest.api.signature.path                 | OPS, To0Scheduler      | REST endpoint path at OCS for signature operations. | URI                    |
+| rest.api.session.path                   | OPS                    | REST endpoint path at OCS for session info operations. | URI                 |
+| rest.api.owner.resale.support.path      | OPS                    | REST endpoint path at OCS to fetch owner resale support flag per device. | URI               |
+| rest.api.setupinfo.path                 | OPS                    | REST endpoint path at OCS to get device setup information | URI                      |
+| rest.api.serviceinfo.path               | OPS                    | REST endpoint path at OCS to fetch service-info list. |  URI                       |
+| rest.api.serviceinfo.value.path         | OPS                    | REST endpoint path at OCS to fetch service-info. | URI                        |
+| rest.api.psi.path                       | OPS                    | REST endpoint path at OCS to get pre-service info. | URI                        |
+| client.ssl.key-store-type               | OPS                    | The keystore-type. | String                     |
+| client.ssl.trust-store-type             | OPS                    | The truststore-type. | String                    |
+| client.ssl.key-store                    | OPS                    | Path to the keystore. | URI                    |
+| client.ssl.trust-store                  | OPS                    | Path to the truststore. | URI                     |
+| client.ssl.key-store-password           | OPS                    | The keystore password. | String                     |
+| client.ssl.trust-store-password         | OPS                    | The truststore password. | String                     |
+| session.pool.size                       | To0Scheduler           | The number of TO0 sessions that can be scheduled at a given time, subject to the availability of threads. | Number                |
+| org.sdo.to0.ownersign.to0d.ws           | To0Scheduler           | The default suggested number of seconds, as sent by the To0Scheduler, until which TO0 is valid in Rendezvous. This is overridden by 'to0.waitseconds' property of OCS as sent in the request. | java.time.Duration                |
+| org.sdo.to0.ownersign.to1d.bo           | To0Scheduler           | Path to the file that contains Owner redirect information, i.e dns, ip address and port exposed by the owner.| URI                  |
+| org.sdo.to0.tls.test-mode               | To0Scheduler           | Boolean property that determines whether the certificates as presented by the Rendezvous, is verified (false) or not (true) during TLS handshake. | Boolean                  |
+| server.port                      | OCS, OPS, To0Scheduler | The port where server is listening at. | Number                     |
+| logging.config                   | OCS, OPS, To0Scheduler | Path of logback configuration file. | URI                     |
+| application.version              | OCS, OPS, To0Scheduler | Application version used for health check request. | Number                     |
+| server.ssl.key-store-type        | OCS, OPS, To0Scheduler | The keystore type. | String                     |
+| server.ssl.trust-store-type      | OCS, OPS, To0Scheduler | The truststore-type. | String                     |
+| server.ssl.key-store             | OCS, OPS, To0Scheduler | Path to keystore file. The certificate inside keystore must have a certificate whose CN or SAN entries allows hostname verification to succeed. For example, the sample keystore works when the other services are running in the same machine, since the certificate has DNS as localhost. | URI                     |
+| server.ssl.trust-store           | OCS, OPS, To0Scheduler | Path to truststore file. It Must contain the certifcates capable of verifying the certificates present in the incoming requests.| URI                     |
+| server.ssl.key-store-password    | OCS, OPS, To0Scheduler | The keystore password | String                     |
+| server.ssl.trust-store-password  | OCS, OPS, To0Scheduler | The truststore password | String                     |
+| server.ssl.client-auth           | OCS, OPS, To0Scheduler | The TLS auth setter. For mTLS to work, it should be set to 'need', and 'warn' other-wise. | String                     |
+| server.ssl.ciphers               | OCS, OPS, To0Scheduler | The list of cipher suites that the server will be accepted for TLS handshake. It is a subset of cipher suites supported by the TLS version.  | String                     |
+| server.ssl.enabled-protocols     | OCS, OPS, To0Scheduler | The TLS version. Recommended to be set to TLSv1.3.|String                     |
 
 For more details on configuration and setup, refer to https://secure-device-onboard.github.io/docs/iot-platform-sdk/running-the-demo/.
