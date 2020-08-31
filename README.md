@@ -185,4 +185,4 @@ Each Java property mentioned in column 'Property name' is directly mapped to the
 | server.ssl.ciphers               | OCS, OPS, To0Scheduler | The list of cipher suites that the server will be accepted for TLS handshake. It is a subset of cipher suites supported by the TLS version.  | String                     | SERVER_SSL_CIPHERS         |
 | server.ssl.enabled-protocols     | OCS, OPS, To0Scheduler | The TLS version. Recommended to be set to TLSv1.3.|String                     | SERVER_SSL_ENABLED_PROTOCOLS        |
 
-For more details on configuration and setup, refer to https://secure-device-onboard.github.io/docs/iot-platform-sdk/running-the-demo/.
+For more details on configuration and setup, refer to https://secure-device-onboard.github.io/docs/latest/iot-platform-sdk/running-the-demo/.
