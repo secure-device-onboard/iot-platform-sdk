@@ -1,14 +1,14 @@
 # About
 
 The Secure Device Onboard (SDO) IoT Platform SDK is the SDO Owner protocol implementation. It is
-divided into three different components: Owner Protocol Service (OPS), TO0 Scheduler (TO0Scheduler)
+divided into three different components: Owner Protocol Service (OPS), TO0 Scheduler (TO0Scheduler),
 and Owner Companion Service (OCS). OCS manages customer-specific artifacts (OwnershipVoucher files,
-ServiceInfo packages etc.), and uses the service provided by TO0Scheduler to register
+ServiceInfo packages and others), and uses the service provided by TO0Scheduler to register
 OwnershipVoucher files with the Rendezvous server through the Transfer of Ownership, step 0 (TO0)
 protocol. OPS implements the Transfer of Ownership, step 2 (TO2) protocol and interacts with the OCS
 to retrieve customer-specific artifacts.
 
-# Getting started with the SDO IoT Platform SDK
+# Getting Started with the SDO IoT Platform SDK
 
 The following are the system constraints for the SDO IoT Platform SDK:
 - Operating System: Ubuntu* 20.04
@@ -16,11 +16,11 @@ The following are the system constraints for the SDO IoT Platform SDK:
 - Apache Maven* 3.5.4 (Optional) software for building the SDO IoT Platform SDK from source
 - Java IDE (Optional) for convenience in modifying the source code (especially for customizing OCS).
 - OpenSSL (Optional) for creating owner keys and key-store
-- Docker 18.09
+- Docker* 18.09
 - Docker compose 1.21.2
 - Haveged
 
-# Directory structure
+# Directory Structure
 
 Details about the directory structure for iot-platform-sdk in the source and binary package are
 described as follows.
@@ -62,17 +62,18 @@ Artifacts are built and managed in the development environment via [Apache Maven
 mvn clean install
 ```
 
-# Running the SDO IoT Platform SDK demo
+# Running the SDO IoT Platform SDK Demo
 
-The SDO IoT Platform SDK demo can either be run manually, by running the binaries,
-or it can be run using Docker scripts. To run each component in separate
+The SDO IoT Platform SDK demo can either be runned manually, by running the binaries,
+or it can be runned using Docker scripts. To run each component in separate
 machines, replace the keystore and truststore files. The certificates inside
 these files must match the machine's IP/DNS where the component is running.
 The Protocol Reference Implementation (PRI), containing Rendezvous and Device
 can be used to run the demo. For more information on setting up PRI, follow the
 product's README.
 
-**NOTE**: The IOT Platform SDK demo is provided solely to demonstrate interoperation of the IoT Platform SDK components (ocs, ops, and to0scheduler) with the Rendezvous Service and Device. _This demo is not recommended for use in any production capacity._  Appropriate security measures with respect to key-store management and configuration management should be considered while performing production deployment of any Secure Device Onboard component.
+!!! NOTE 
+    The IOT Platform SDK demo is provided solely to demonstrate interoperation of the IoT Platform SDK components (ocs, ops, and to0scheduler) with the Rendezvous Service and Device. _This demo is not recommended for use in any production capacity._  Appropriate security measures with respect to key-store management and configuration management should be considered while performing production deployment of any Secure Device Onboard component.
 
 The following instructions follow these notations:
 
@@ -80,7 +81,7 @@ The following instructions follow these notations:
 * `<pri-rendezvous-dir>`: Base location used to run rendezvous, typically `<sdo-pri-root>/demo/rendezvous`
 * `<pri-device-dir>`: Base location used to run device, typically `<sdo-pri-root>/demo/device`
 
-## Updating the proxy information (Optional)
+## Updating the Proxy Information (Optional)
 
 Update the proxy information in _JAVA_OPTIONS as
 `_JAVA_OPTIONS=-Dhttp.proxyHost=http_proxy_host -Dhttp.proxyPort=http_proxy_port -Dhttps.proxyHost=https_proxy_host -Dhttps.proxyPort=https_proxy_port`, where
@@ -91,13 +92,13 @@ Update the proxy information in _JAVA_OPTIONS as
 Specify the combination of the hostname and port information together for either http, https or both.
 If no proxy needs to be specified, do not specify the flags in _JAVA_OPTIONS.
 
-## Configuring Ondie ECDSA properties
+## Configuring Ondie ECDSA Properties
 
 For successful onboarding of Ondie ECDSA clients, appropriate CRL files must be present in the path as specified by the property `org.sdo.ops.ondie-ecdsa-material-path`.
 If the CRL files need to be downloaded into the same path, set the property `org.sdo.ops.ondie-ecdsa-material-urls` with a list of appropriate URLs from where the CRL files will be downloaded.
 If demo is being run in a closed network or if no update needs to be made to the existing CRL files in the same path, set the property `org.sdo.ops.ondie-ecdsa-material-update` value to 'false'.
 
-## Running the SDO IoT Platform SDK demo using the Docker scripts
+## Running the SDO IoT Platform SDK Demo Using the Docker Scripts
 
 To run the SDO IoT Platform SDK demo using the Docker scripts, update the proxy information and
 execute the rendezvous service and device as per the steps mentioned below.
@@ -122,16 +123,17 @@ $ cd <pri-device-dir>
 $ ./device
 ```
 
-**NOTE**: To re-trigger TO0 for a device for which TO0 was previously done and is currently active, please delete the file 'state.json' located at \<ocs-config-dir\>/db/v1/devices/\<deviceID\>/.
+!!! NOTE 
+    To re-trigger TO0 for a device for which TO0 was previously done and is currently active, please delete the file 'state.json' located at \<ocs-config-dir\>/db/v1/devices/\<deviceID\>/.
 
-## Configuring properties in SDO IoT Platform SDK
+## Configuring Properties in SDO IoT Platform SDK
 
 The properties for the services running inside the docker containers, can be configured at:
 * `ocs.env`: Contains the configuration properties for OCS. The properties specified in this file, are used to set the corresponding Java properties for the OCS service, by the script 'run-ocs' at \<sdo-iot-platform-sdk-root\>/demo/ocs/.
 * `ops.env`: Contains the configuration properties for OPS. The properties specified in this file, are used to set the corresponding Java properties for the OPS service, by the script 'run-ops' at \<sdo-iot-platform-sdk-root\>/demo/ops/.
 * `to0scheduler.env`: Contains the configuration properties for To0Scheduler. The properties specified in this file, are used to set the corresponding Java properties for the To0Scheduler service, by the script 'run-to0scheduler' at \<sdo-iot-platform-sdk-root\>/demo/to0scheduler/.
 
-Each Java property mentioned in column 'Property name' is directly mapped to the entry in column 'Corresponding property in Docker .env', in the below table.
+Each Java property mentioned in column 'Property name' is directly mapped to the entry in column 'Corresponding property in Docker .env', in the table below.
 
 | Property name                           | Applicable to          | Description                                | Value type           | Corresponding property in Docker .env |
 |-----------------------------------------|------------------------|--------------------------------------------|----------------------|-----------------------------------|
