@@ -14,12 +14,14 @@ import java.security.SecureRandom;
 import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import javax.xml.bind.DatatypeConverter;
 import org.sdo.iotplatformsdk.common.protocol.codecs.ByteArrayCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.EncryptedMessageCodec;
 import org.sdo.iotplatformsdk.common.protocol.codecs.KexParamCodec;
@@ -50,6 +52,7 @@ import org.sdo.iotplatformsdk.common.rest.DeviceCryptoInfo;
 import org.sdo.iotplatformsdk.common.rest.Message41Store;
 import org.sdo.iotplatformsdk.common.rest.Message45Store;
 import org.sdo.iotplatformsdk.common.rest.To2DeviceSessionInfo;
+import org.sdo.iotplatformsdk.ops.epid.EpidConstants;
 import org.sdo.iotplatformsdk.ops.epid.EpidSecurityProvider;
 import org.sdo.iotplatformsdk.ops.serviceinfo.PreServiceInfoMultiSource;
 import org.sdo.iotplatformsdk.ops.serviceinfo.ServiceInfoModule;
@@ -140,7 +143,21 @@ public class Message44Handler {
         EpidSecurityProvider.setEpidOptions(getEpidOptions().getEpidOnlineUrl(),
             getEpidOptions().getTestMode());
         EpidSecurityProvider.load();
-
+        // verify appId for EPID-based clients
+        boolean isAppIdValid = false;
+        final byte[] proveDeviceAppId = new byte[proveDevice.getAi().capacity()];
+        proveDevice.getAi().get(proveDeviceAppId);
+        proveDevice.getAi().flip();
+        for (final String appId : EpidConstants.appIdList) {
+          if (Arrays.equals(proveDeviceAppId, DatatypeConverter.parseHexBinary(appId))) {
+            isAppIdValid = true;
+            break;
+          }
+        }
+        if (!isAppIdValid) {
+          throw new SdoProtocolException(
+              new SdoError(SdoErrorCode.MessageRefused, proveDevice.getType(), "Invalid appId"));
+        }
       } else if (pk instanceof OnDieEcdsaKey384) {
         certPath = proxy.getDc();
       } else { // pk not epid

@@ -14,4 +14,6 @@ public class EpidConstants {
 
   public static final int EPID1X_GID_SIZE = 4;
   public static final int EPID2X_GID_SIZE = 16;
+
+  public static final String[] appIdList = {"e2cb06bd11a323419d1d3563b809bc46"};
 }
