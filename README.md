@@ -11,7 +11,7 @@ to retrieve customer-specific artifacts.
 # Getting started with the SDO IoT Platform SDK
 
 The following are the system constraints for the SDO IoT Platform SDK:
-- Operating System: Ubuntu* 18.04
+- Operating System: Ubuntu* 20.04
 - Java* Development Kit 11
 - Apache Maven* 3.5.4 (Optional) software for building the SDO IoT Platform SDK from source
 - Java IDE (Optional) for convenience in modifying the source code (especially for customizing OCS).
