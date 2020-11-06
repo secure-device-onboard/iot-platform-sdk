@@ -4,7 +4,7 @@ Docker Script for Building IOT-platform-SDK repository. Using this script you ca
 
 ## Prerequisites
 
-- Operating system: **Ubuntu 18.04.**
+- Operating system: **Ubuntu 20.04.**
 
 - Docker engine : **18.06.0**
 
