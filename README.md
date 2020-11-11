@@ -64,8 +64,8 @@ mvn clean install
 
 # Running the SDO IoT Platform SDK Demo
 
-The SDO IoT Platform SDK demo can either be runned manually, by running the binaries,
-or it can be runned using Docker scripts. To run each component in separate
+The SDO IoT Platform SDK demo can either be run manually, by running the binaries,
+or it can be run using Docker scripts. To run each component in separate
 machines, replace the keystore and truststore files. The certificates inside
 these files must match the machine's IP/DNS where the component is running.
 The Protocol Reference Implementation (PRI), containing Rendezvous and Device
