@@ -27,7 +27,7 @@
     <com.fasterxml.jackson.version>2.10.3</com.fasterxml.jackson.version>
     <org.bouncycastle.version>1.66</org.bouncycastle.version>
     <org.jsoup.jsoup.version>1.13.1</org.jsoup.jsoup.version>
-    <org.apache.httpcomponents.version>4.5.12</org.apache.httpcomponents.version>
+    <org.apache.httpcomponents.version>4.5.13</org.apache.httpcomponents.version>
     <org.apache.commons.configuration2.version>2.7</org.apache.commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <io.projectreactor.version>3.3.9.RELEASE</io.projectreactor.version>
