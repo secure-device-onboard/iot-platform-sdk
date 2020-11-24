@@ -66,7 +66,7 @@ public class EpidOnlineVerifier {
     try {
       httpClient = HttpClient.newBuilder()
           .sslContext(new SslContextFactory(new SecureRandomFactory().getObject()).getObject())
-          .build();
+          .version(HttpClient.Version.HTTP_1_1).build();
     } catch (Exception e) {
       return EpidLib.EpidStatus.kEpidErr.getValue();
     }

@@ -76,7 +76,8 @@ public class To0ClientSession {
       throws IOException, ExecutionException, InterruptedException {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext)
-        .connectTimeout(Duration.ofSeconds(5)).executor(executor).build();
+        .connectTimeout(Duration.ofSeconds(5)).executor(executor)
+        .version(HttpClient.Version.HTTP_1_1).build();
     try {
       // Which crypto level is used in this ownership voucher?
       // Our registration should use the same level.

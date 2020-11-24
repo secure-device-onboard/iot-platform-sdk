@@ -106,7 +106,7 @@ public class FsRestClient {
   public void postDevicesForTo0(final To0Request request) {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext()).connectTimeout(timeout)
-        .executor(executor).build();
+        .executor(executor).version(HttpClient.Version.HTTP_1_1).build();
     try {
       final String requestBody = new ObjectMapper().writeValueAsString(request);
       final HttpRequest.Builder httpRequestBuilder =
