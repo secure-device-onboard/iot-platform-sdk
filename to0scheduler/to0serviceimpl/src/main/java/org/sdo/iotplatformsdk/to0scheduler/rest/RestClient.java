@@ -59,7 +59,8 @@ public class RestClient {
   public String getDeviceVoucher(final String deviceId) {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-        .connectTimeout(httpClientTimeout).executor(executor).build();
+        .connectTimeout(httpClientTimeout).executor(executor)
+        .version(HttpClient.Version.HTTP_1_1).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.voucher.path");
@@ -99,7 +100,8 @@ public class RestClient {
   public void postDeviceState(final String deviceId, final DeviceState state) {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-        .connectTimeout(httpClientTimeout).executor(executor).build();
+        .connectTimeout(httpClientTimeout).executor(executor)
+        .version(HttpClient.Version.HTTP_1_1).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.device.state.path");
@@ -138,7 +140,8 @@ public class RestClient {
   public SignatureResponse signatureOperation(final UUID uuid, final String bo) {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-        .connectTimeout(httpClientTimeout).executor(executor).build();
+        .connectTimeout(httpClientTimeout).executor(executor)
+        .version(HttpClient.Version.HTTP_1_1).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.signature.path");
@@ -181,7 +184,8 @@ public class RestClient {
   public void postError(final String deviceId, final DeviceState state) {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     HttpClient httpClient = HttpClient.newBuilder().sslContext(sslContext())
-        .connectTimeout(httpClientTimeout).executor(executor).build();
+        .connectTimeout(httpClientTimeout).executor(executor)
+        .version(HttpClient.Version.HTTP_1_1).build();
     try {
       final String apiServer = To0PropertiesLoader.getProperty("rest.api.server");
       final String path = To0PropertiesLoader.getProperty("rest.api.error.path");
