@@ -11,7 +11,7 @@
   <description>SDO IoT Platform SDK</description>
   <groupId>org.sdo</groupId>
   <artifactId>iotplatformsdk</artifactId>
-  <version>1.9</version>
+  <version>1.9.1</version>
   <name>SDO IoT Platform SDK</name>
   <packaging>pom</packaging>
   <url>file:///tmp/sdo</url>
@@ -19,15 +19,17 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.3.2.RELEASE</version>
+    <version>2.3.5.RELEASE</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
   <properties>
-    <com.fasterxml.jackson.version>2.10.3</com.fasterxml.jackson.version>
+    <tomcat.version>9.0.40</tomcat.version>
+    <com.fasterxml.jackson.version>2.10.5</com.fasterxml.jackson.version>
+    <com.fasterxml.jackson.databind.version>2.10.5.1</com.fasterxml.jackson.databind.version>
     <org.bouncycastle.version>1.66</org.bouncycastle.version>
     <org.jsoup.jsoup.version>1.13.1</org.jsoup.jsoup.version>
-    <org.apache.httpcomponents.version>4.5.12</org.apache.httpcomponents.version>
+    <org.apache.httpcomponents.version>4.5.13</org.apache.httpcomponents.version>
     <org.apache.commons.configuration2.version>2.7</org.apache.commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <io.projectreactor.version>3.3.9.RELEASE</io.projectreactor.version>
@@ -167,7 +169,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${com.fasterxml.jackson.version}</version>
+        <version>${com.fasterxml.jackson.databind.version}</version>
       </dependency>
 
       <dependency>
