@@ -24,6 +24,7 @@
   </parent>
 
   <properties>
+    <tomcat.version>9.0.40</tomcat.version>
     <com.fasterxml.jackson.version>2.10.5</com.fasterxml.jackson.version>
     <com.fasterxml.jackson.databind.version>2.10.5.1</com.fasterxml.jackson.databind.version>
     <org.bouncycastle.version>1.66</org.bouncycastle.version>
