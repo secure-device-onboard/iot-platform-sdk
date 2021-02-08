@@ -11,7 +11,7 @@
   <description>SDO IoT Platform SDK</description>
   <groupId>org.sdo</groupId>
   <artifactId>iotplatformsdk</artifactId>
-  <version>1.10</version>
+  <version>1.10.1-SNAPSHOT</version>
   <name>SDO IoT Platform SDK</name>
   <packaging>pom</packaging>
   <url>file:///tmp/sdo</url>
