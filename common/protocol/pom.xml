@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.sdo.iotplatformsdk</groupId>
     <artifactId>common</artifactId>
-    <version>1.10.2-SNAPSHOT</version>
+    <version>1.10.2</version>
     <relativePath>..</relativePath>
   </parent>
 
