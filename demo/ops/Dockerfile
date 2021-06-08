@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache 2.0
 
 FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
 ARG _JAVA_OPTIONS
 ENV _JAVA_OPTIONS=${_JAVA_OPTIONS}
-RUN apt-get update && apt-get install -y libssl-dev
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y libssl-dev
 RUN apt-get install -y openjdk-11-jdk
 RUN apt-get install -y haveged
 # Create a user 'sdouser'.
