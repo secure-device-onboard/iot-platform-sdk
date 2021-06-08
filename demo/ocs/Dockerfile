@@ -14,7 +14,9 @@ WORKDIR /home/sdouser
 RUN mkdir ./ocs
 RUN mkdir ./ocs/config/
 COPY ocs/config/logback-spring.xml ./ocs/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY ocs/config/ocs-keystore.p12 ./ocs/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY ocs/config/ocs-truststore ./ocs/config
 COPY ocs/config/run-ocs ./ocs/config/run-ocs
 COPY ocs/ocsfs-*.war ./ocs

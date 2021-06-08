@@ -40,7 +40,7 @@ The SDO IoT Platform SDK source code has the following folders:
 
 * `common`: Common beans and utilities that are imported by the other modules.
 
-Configuration files for the preceding three modules are placed in the following folders:
+Example configuration files for the preceding three modules are placed in the following folders:
 
 * `<ocs-config-dir>` : <sdo-iot-platform-sdk-root>/demo/ocs/config
 * `<ops-config-dir>` : <sdo-iot-platform-sdk-root>/demo/ops/config

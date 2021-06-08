@@ -1,6 +1,7 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
-
+#
+# NOTE: This is an example implementation using simplified credentials. This must be updated appropriately while performing production deployment.
 version: "2.4"
 
 services:
