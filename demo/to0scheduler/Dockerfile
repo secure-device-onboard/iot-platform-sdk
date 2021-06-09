@@ -15,7 +15,9 @@ WORKDIR /home/sdouser/
 RUN mkdir ./to0scheduler
 RUN mkdir ./to0scheduler/config/
 COPY to0scheduler/config/logback-spring.xml ./to0scheduler/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY to0scheduler/config/to0service-keystore.p12 ./to0scheduler/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY to0scheduler/config/to0service-truststore ./to0scheduler/config
 COPY to0scheduler/config/run-to0scheduler ./to0scheduler/config/run-to0scheduler
 COPY to0scheduler/to0scheduler-*.war ./to0scheduler

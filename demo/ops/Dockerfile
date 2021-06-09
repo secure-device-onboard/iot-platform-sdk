@@ -15,7 +15,9 @@ WORKDIR /home/sdouser/
 RUN mkdir ./ops
 RUN mkdir ./ops/config
 COPY ops/config/logback-spring.xml ./ops/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY ops/config/ops-keystore.p12 ./ops/config
+# This is an example implementation using simplified credentials. This must be changed while performing production deployment.
 COPY ops/config/ops-truststore ./ops/config
 COPY ops/config/run-ops ./ops/config/run-ops
 COPY ops/ops-*.war ./ops

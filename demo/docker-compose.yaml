@@ -1,12 +1,13 @@
 # Copyright 2020 Intel Corporation
 # SPDX-License-Identifier: Apache 2.0
-
+#
+# NOTE: This is an example implementation using simplified credentials. This must be updated appropriately while performing production deployment.
 version: "2.4"
 
 services:
 
   to0scheduler:
-    image: to0scheduler:1.10.2-SNAPSHOT
+    image: to0scheduler:1.10.2
     container_name: to0scheduler
     expose:
       - "8049"
@@ -31,7 +32,7 @@ services:
     network_mode: host
     
   ocs:
-    image: ocs:1.10.2-SNAPSHOT
+    image: ocs:1.10.2
     container_name: owner-companion-service
     expose:
       - "9009"
@@ -58,7 +59,7 @@ services:
     network_mode: host
 
   ops:
-    image: ops:1.10.2-SNAPSHOT
+    image: ops:1.10.2
     container_name: owner-protocol-service
     expose:
       - 8042
