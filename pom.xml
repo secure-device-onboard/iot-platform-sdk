@@ -39,6 +39,7 @@
     <org.apache.maven.plugins.maven-checkstyle-plugin.version>
       3.1.0
     </org.apache.maven.plugins.maven-checkstyle-plugin.version>
+    <log4j.version>2.15.0</log4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
