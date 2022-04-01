@@ -7,7 +7,7 @@ version: "2.4"
 services:
 
   to0scheduler:
-    image: to0scheduler:1.10.5
+    image: to0scheduler:1.10.6-SNAPSHOT
     container_name: to0scheduler
     expose:
       - "8049"
@@ -32,7 +32,7 @@ services:
     network_mode: host
     
   ocs:
-    image: ocs:1.10.5
+    image: ocs:1.10.6-SNAPSHOT
     container_name: owner-companion-service
     expose:
       - "9009"
@@ -59,7 +59,7 @@ services:
     network_mode: host
 
   ops:
-    image: ops:1.10.5
+    image: ops:1.10.6-SNAPSHOT
     container_name: owner-protocol-service
     expose:
       - 8042
