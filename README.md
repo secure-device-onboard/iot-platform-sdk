@@ -1,3 +1,5 @@
+***Note:***  The support for this product will be discontinued from Dec 1, 2022. We recommend users to switch to FDO components (https://github.com/secure-device-onboard/pri-fidoiot).
+
 # About
 
 The Secure Device Onboard (SDO) IoT Platform SDK is the SDO Owner protocol implementation. It is
