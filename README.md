@@ -94,9 +94,17 @@ If no proxy needs to be specified, do not specify the flags in _JAVA_OPTIONS.
 
 ## Configuring Ondie ECDSA Properties
 
-For successful onboarding of Ondie ECDSA clients, appropriate CRL files must be present in the path as specified by the property `org.sdo.ops.ondie-ecdsa-material-path`.
-If the CRL files need to be downloaded into the same path, set the property `org.sdo.ops.ondie-ecdsa-material-urls` with a list of appropriate URLs from where the CRL files will be downloaded.
-If demo is being run in a closed network or if no update needs to be made to the existing CRL files in the same path, set the property `org.sdo.ops.ondie-ecdsa-material-update` value to 'false'.
+If supporting OnDie ECDSA devices, set `ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_PATH` property `<sdo-iot-platform-sdk-root>/demo/ops/ops.env`. The cachedir is used to store CRL and cert files and
+can be populated by running the provided script (`<sdo-iot-platform-sdk-root>/scripts/onDieCache.py`) to load the directory with the files
+from the cloud.
+
+To run the onDieCache.py script, python3 must be installed.
+Invoke as follows:
+```
+python3 onDieCache.py --cachedir ONDIE_PATH
+```
+where ONDIE_PATH = target location to store CRL and cert files. Typically, this will match the value of `ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_PATH`.
+However, it is also possible to run the script on a different host and then copy the downloaded files into `ORG_SDO_OPS_ONDIE_ECDSA_MATERIAL_PATH`.
 
 ## Running the SDO IoT Platform SDK Demo Using the Docker Scripts
 
