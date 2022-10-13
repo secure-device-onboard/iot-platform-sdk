@@ -30,7 +30,7 @@
     <org.bouncycastle.version>1.70</org.bouncycastle.version>
     <org.jsoup.jsoup.version>1.14.2</org.jsoup.jsoup.version>
     <org.apache.httpcomponents.version>4.5.13</org.apache.httpcomponents.version>
-    <org.apache.commons.configuration2.version>2.7</org.apache.commons.configuration2.version>
+    <org.apache.commons.configuration2.version>2.8.0</org.apache.commons.configuration2.version>
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <io.projectreactor.version>3.4.6</io.projectreactor.version>
     <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
